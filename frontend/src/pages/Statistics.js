@@ -13,6 +13,9 @@ import { Calendar, Filter, Download, TrendingUp, Users, FileText, X } from 'luci
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
+import 'dayjs/locale/ru';
+
+dayjs.locale('ru');
 
 const COLORS = ['hsl(172 39% 40%)', 'hsl(187 45% 38%)', 'hsl(266 42% 62%)', 'hsl(38 92% 60%)', 'hsl(155 38% 40%)'];
 
@@ -35,11 +38,20 @@ export default function Statistics() {
       const response = await statsApi.getYearlySummary(year);
       setSummary(response.data);
     } catch (err) {
-      toast.error('Failed to load statistics');
+      toast.error('Не удалось загрузить статистику');
       console.error(err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getVisitWord = (count) => {
+    const lastDigit = count % 10;
+    const lastTwoDigits = count % 100;
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return 'визитов';
+    if (lastDigit === 1) return 'визит';
+    if (lastDigit >= 2 && lastDigit <= 4) return 'визита';
+    return 'визитов';
   };
 
   if (loading) {
@@ -52,12 +64,12 @@ export default function Statistics() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-[hsl(var(--foreground))]" data-testid="statistics-page-title">
-            Statistics
+            Статистика
           </h1>
-          <p className="text-muted-foreground mt-1">Year-end summaries and analytics</p>
+          <p className="text-muted-foreground mt-1">Годовые итоги и аналитика</p>
         </div>
         <div className="flex items-center gap-3">
-          <Label htmlFor="year-select" className="text-sm text-muted-foreground">Year:</Label>
+          <Label htmlFor="year-select" className="text-sm text-muted-foreground">Год:</Label>
           <Select value={year.toString()} onValueChange={(v) => setYear(parseInt(v))}>
             <SelectTrigger className="w-32" id="year-select" data-testid="stats-year-select">
               <SelectValue />
@@ -80,7 +92,7 @@ export default function Statistics() {
                 <Users className="w-6 h-6 text-[hsl(var(--primary))]" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Active Clients</p>
+                <p className="text-sm text-muted-foreground">Активных клиентов</p>
                 <p className="text-2xl font-bold" data-testid="stats-active-clients">
                   {summary?.total_clients_active || 0}
                 </p>
@@ -95,7 +107,7 @@ export default function Statistics() {
                 <Calendar className="w-6 h-6 text-[hsl(var(--chart-2))]" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Visits</p>
+                <p className="text-sm text-muted-foreground">Всего визитов</p>
                 <p className="text-2xl font-bold" data-testid="stats-total-visits">
                   {summary?.total_visits || 0}
                 </p>
@@ -110,7 +122,7 @@ export default function Statistics() {
                 <TrendingUp className="w-6 h-6 text-[hsl(var(--chart-3))]" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Unique Topics</p>
+                <p className="text-sm text-muted-foreground">Уникальных тем</p>
                 <p className="text-2xl font-bold" data-testid="stats-unique-topics">
                   {summary?.topic_distribution?.length || 0}
                 </p>
@@ -125,8 +137,8 @@ export default function Statistics() {
         {/* Topic Distribution Bar Chart */}
         <Card className="card-shadow">
           <CardHeader>
-            <CardTitle className="text-lg">Topic Distribution</CardTitle>
-            <CardDescription>Most common visit topics in {year}</CardDescription>
+            <CardTitle className="text-lg">Распределение тем</CardTitle>
+            <CardDescription>Самые частые темы визитов в {year} году</CardDescription>
           </CardHeader>
           <CardContent>
             {summary?.topic_distribution?.length > 0 ? (
@@ -136,14 +148,14 @@ export default function Statistics() {
                     <CartesianGrid strokeDasharray="2 4" stroke="#E6F0EE" />
                     <XAxis dataKey="topic" tick={{ fontSize: 11 }} angle={-45} textAnchor="end" height={80} />
                     <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="hsl(172 39% 40%)" radius={[4, 4, 0, 0]} />
+                    <Tooltip formatter={(value) => [`${value} ${getVisitWord(value)}`, 'Количество']} />
+                    <Bar dataKey="count" fill="hsl(172 39% 40%)" radius={[4, 4, 0, 0]} name="Визиты" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             ) : (
               <div className="h-64 flex items-center justify-center text-muted-foreground">
-                No topic data for {year}
+                Нет данных за {year} год
               </div>
             )}
           </CardContent>
@@ -152,8 +164,8 @@ export default function Statistics() {
         {/* Topic Pie Chart */}
         <Card className="card-shadow">
           <CardHeader>
-            <CardTitle className="text-lg">Topic Breakdown</CardTitle>
-            <CardDescription>Percentage distribution of topics</CardDescription>
+            <CardTitle className="text-lg">Структура тем</CardTitle>
+            <CardDescription>Процентное распределение тем</CardDescription>
           </CardHeader>
           <CardContent>
             {summary?.topic_distribution?.length > 0 ? (
@@ -174,13 +186,13 @@ export default function Statistics() {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip formatter={(value) => [`${value} ${getVisitWord(value)}`, 'Количество']} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
             ) : (
               <div className="h-64 flex items-center justify-center text-muted-foreground">
-                No data available
+                Нет данных
               </div>
             )}
           </CardContent>
@@ -190,8 +202,8 @@ export default function Statistics() {
       {/* Client Summaries Table */}
       <Card className="card-shadow">
         <CardHeader>
-          <CardTitle className="text-lg">Client Summaries - {year}</CardTitle>
-          <CardDescription>Visit counts and topics per client</CardDescription>
+          <CardTitle className="text-lg">Итоги по клиентам - {year} год</CardTitle>
+          <CardDescription>Количество визитов и темы по каждому клиенту</CardDescription>
         </CardHeader>
         <CardContent>
           {summary?.client_summaries?.length > 0 ? (
@@ -199,10 +211,10 @@ export default function Statistics() {
               <Table data-testid="client-summaries-table">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Client Name</TableHead>
-                    <TableHead className="text-center">Visits</TableHead>
-                    <TableHead>Top Topics</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Имя клиента</TableHead>
+                    <TableHead className="text-center">Визиты</TableHead>
+                    <TableHead>Главные темы</TableHead>
+                    <TableHead className="text-right">Действия</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -220,14 +232,14 @@ export default function Statistics() {
                             </Badge>
                           ))}
                           {client.topics.length > 3 && (
-                            <Badge variant="outline" className="text-xs">+{client.topics.length - 3} more</Badge>
+                            <Badge variant="outline" className="text-xs">+{client.topics.length - 3} ещё</Badge>
                           )}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <Link to={`/clients/${client.client_id}`}>
                           <Button variant="ghost" size="sm" data-testid={`view-client-${client.client_id}`}>
-                            View
+                            Открыть
                           </Button>
                         </Link>
                       </TableCell>
@@ -241,12 +253,12 @@ export default function Statistics() {
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                 <FileText className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h3 className="font-medium mb-2">No activity in {year}</h3>
+              <h3 className="font-medium mb-2">Нет активности в {year} году</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                No client visits were recorded for this year
+                Визиты клиентов за этот год не записаны
               </p>
               <Link to="/clients">
-                <Button>View All Clients</Button>
+                <Button>Все клиенты</Button>
               </Link>
             </div>
           )}

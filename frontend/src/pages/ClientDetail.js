@@ -14,6 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { ArrowLeft, Calendar, Edit, Trash2, Plus, User, FileText, X, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import dayjs from 'dayjs';
+import 'dayjs/locale/ru';
+
+dayjs.locale('ru');
 
 export default function ClientDetail() {
   const { id } = useParams();
@@ -46,7 +49,7 @@ export default function ClientDetail() {
       const response = await clientsApi.getOne(id);
       setClient(response.data);
     } catch (err) {
-      toast.error('Failed to load client');
+      toast.error('Не удалось загрузить клиента');
       navigate('/clients');
     } finally {
       setLoading(false);
@@ -66,7 +69,7 @@ export default function ClientDetail() {
       setVisits(response.data.visits);
       setTotalPages(response.data.total_pages);
     } catch (err) {
-      toast.error('Failed to load visits');
+      toast.error('Не удалось загрузить визиты');
     } finally {
       setVisitsLoading(false);
     }
@@ -75,21 +78,21 @@ export default function ClientDetail() {
   const handleDeleteClient = async () => {
     try {
       await clientsApi.delete(id);
-      toast.success('Client deleted successfully');
+      toast.success('Клиент удалён');
       navigate('/clients');
     } catch (err) {
-      toast.error('Failed to delete client');
+      toast.error('Не удалось удалить клиента');
     }
   };
 
   const handleDeleteVisit = async (visitId) => {
     try {
       await visitsApi.delete(visitId);
-      toast.success('Visit deleted');
+      toast.success('Визит удалён');
       fetchVisits();
       fetchClient();
     } catch (err) {
-      toast.error('Failed to delete visit');
+      toast.error('Не удалось удалить визит');
     }
   };
 
@@ -106,12 +109,21 @@ export default function ClientDetail() {
     return <ClientDetailSkeleton />;
   }
 
+  const getYearWord = (age) => {
+    const lastDigit = age % 10;
+    const lastTwoDigits = age % 100;
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return 'лет';
+    if (lastDigit === 1) return 'год';
+    if (lastDigit >= 2 && lastDigit <= 4) return 'года';
+    return 'лет';
+  };
+
   return (
     <div className="container-responsive py-8">
       {/* Back button */}
       <Link to="/clients" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Clients
+        Назад к клиентам
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -136,19 +148,19 @@ export default function ClientDetail() {
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Delete client?</AlertDialogTitle>
+                      <AlertDialogTitle>Удалить клиента?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This will permanently delete <strong>{client?.first_name} {client?.last_name}</strong> and all their visit records.
+                        Это навсегда удалит <strong>{client?.first_name} {client?.last_name}</strong> и все записи о визитах.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogCancel>Отмена</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDeleteClient}
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         data-testid="delete-client-confirm-button"
                       >
-                        Delete
+                        Удалить
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -161,24 +173,24 @@ export default function ClientDetail() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-muted-foreground">Date of Birth</p>
+              <p className="text-sm text-muted-foreground">Дата рождения</p>
               <p className="font-medium" data-testid="client-dob">
-                {dayjs(client?.dob).format('MMMM D, YYYY')}
+                {dayjs(client?.dob).format('D MMMM YYYY')}
               </p>
               <p className="text-sm text-muted-foreground">
-                {calculateAge(client?.dob)} years old
+                {calculateAge(client?.dob)} {getYearWord(calculateAge(client?.dob))}
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Total Visits</p>
+              <p className="text-sm text-muted-foreground">Всего визитов</p>
               <p className="text-2xl font-bold text-[hsl(var(--primary))]" data-testid="client-visit-count">
                 {client?.visit_count || 0}
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Client Since</p>
+              <p className="text-sm text-muted-foreground">Клиент с</p>
               <p className="font-medium">
-                {dayjs(client?.created_at).format('MMMM D, YYYY')}
+                {dayjs(client?.created_at).format('D MMMM YYYY')}
               </p>
             </div>
           </CardContent>
@@ -191,14 +203,14 @@ export default function ClientDetail() {
             <CardHeader>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <CardTitle>Visit History</CardTitle>
-                  <CardDescription>Record and view all visits</CardDescription>
+                  <CardTitle>История визитов</CardTitle>
+                  <CardDescription>Записи всех визитов</CardDescription>
                 </div>
                 <Dialog open={visitDialogOpen} onOpenChange={setVisitDialogOpen}>
                   <DialogTrigger asChild>
                     <Button className="btn-press" onClick={() => setEditingVisit(null)} data-testid="add-visit-button">
                       <Plus className="w-4 h-4 mr-2" />
-                      Add Visit
+                      Добавить визит
                     </Button>
                   </DialogTrigger>
                   <VisitFormDialog
@@ -214,7 +226,7 @@ export default function ClientDetail() {
               {/* Filters */}
               <div className="flex flex-col sm:flex-row gap-3 mb-4" data-testid="visit-filters">
                 <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">From Date</Label>
+                  <Label className="text-xs text-muted-foreground">С даты</Label>
                   <Input
                     type="date"
                     value={dateFrom}
@@ -223,7 +235,7 @@ export default function ClientDetail() {
                   />
                 </div>
                 <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">To Date</Label>
+                  <Label className="text-xs text-muted-foreground">По дату</Label>
                   <Input
                     type="date"
                     value={dateTo}
@@ -232,9 +244,9 @@ export default function ClientDetail() {
                   />
                 </div>
                 <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Topic</Label>
+                  <Label className="text-xs text-muted-foreground">Тема</Label>
                   <Input
-                    placeholder="Filter by topic"
+                    placeholder="Фильтр по теме"
                     value={topicFilter}
                     onChange={(e) => { setTopicFilter(e.target.value); setPage(1); }}
                     data-testid="topic-filter"
@@ -243,7 +255,7 @@ export default function ClientDetail() {
                 {hasFilters && (
                   <div className="flex items-end">
                     <Button variant="ghost" size="sm" onClick={clearFilters} data-testid="clear-filters-button">
-                      <X className="w-4 h-4 mr-1" /> Clear
+                      <X className="w-4 h-4 mr-1" /> Очистить
                     </Button>
                   </div>
                 )}
@@ -262,15 +274,15 @@ export default function ClientDetail() {
                     <FileText className="w-6 h-6 text-muted-foreground" />
                   </div>
                   <h3 className="font-medium mb-1">
-                    {hasFilters ? 'No matching visits' : 'No visits yet'}
+                    {hasFilters ? 'Визиты не найдены' : 'Визитов пока нет'}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    {hasFilters ? 'Try adjusting your filters' : 'Record the first visit for this client'}
+                    {hasFilters ? 'Попробуйте изменить фильтры' : 'Запишите первый визит этого клиента'}
                   </p>
                   {!hasFilters && (
                     <Button onClick={() => setVisitDialogOpen(true)} data-testid="empty-add-visit-button">
                       <Plus className="w-4 h-4 mr-2" />
-                      Add First Visit
+                      Добавить первый визит
                     </Button>
                   )}
                 </div>
@@ -283,7 +295,7 @@ export default function ClientDetail() {
                           <div className="flex items-center gap-2 mb-1">
                             <Calendar className="w-4 h-4 text-muted-foreground" />
                             <span className="font-medium">
-                              {dayjs(visit.date).format('MMMM D, YYYY')}
+                              {dayjs(visit.date).format('D MMMM YYYY')}
                             </span>
                           </div>
                           <Badge variant="secondary" className="mb-2">
@@ -312,18 +324,18 @@ export default function ClientDetail() {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete visit?</AlertDialogTitle>
+                                <AlertDialogTitle>Удалить визит?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This will permanently delete this visit record.
+                                  Это навсегда удалит эту запись о визите.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>Отмена</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleDeleteVisit(visit.id)}
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >
-                                  Delete
+                                  Удалить
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
@@ -338,7 +350,7 @@ export default function ClientDetail() {
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-between pt-4 mt-4 border-t">
-                  <p className="text-sm text-muted-foreground">Page {page} of {totalPages}</p>
+                  <p className="text-sm text-muted-foreground">Страница {page} из {totalPages}</p>
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
@@ -380,15 +392,15 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
     try {
       if (visit) {
         await visitsApi.update(visit.id, { date, topic, notes });
-        toast.success('Visit updated');
+        toast.success('Визит обновлён');
       } else {
         await visitsApi.create(clientId, { date, topic, notes });
-        toast.success('Visit added');
+        toast.success('Визит добавлен');
       }
       onSuccess();
       onClose();
     } catch (err) {
-      toast.error(visit ? 'Failed to update visit' : 'Failed to add visit');
+      toast.error(visit ? 'Не удалось обновить визит' : 'Не удалось добавить визит');
     } finally {
       setLoading(false);
     }
@@ -398,14 +410,14 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
     <DialogContent>
       <form onSubmit={handleSubmit}>
         <DialogHeader>
-          <DialogTitle>{visit ? 'Edit Visit' : 'Add Visit'}</DialogTitle>
+          <DialogTitle>{visit ? 'Редактировать визит' : 'Добавить визит'}</DialogTitle>
           <DialogDescription>
-            {visit ? 'Update the visit details' : 'Record a new visit for this client'}
+            {visit ? 'Обновите данные визита' : 'Запишите новый визит для этого клиента'}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="visit-date">Date</Label>
+            <Label htmlFor="visit-date">Дата</Label>
             <Input
               id="visit-date"
               type="date"
@@ -416,23 +428,23 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="visit-topic">Topic</Label>
+            <Label htmlFor="visit-topic">Тема</Label>
             <Input
               id="visit-topic"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="e.g., Stress, Sleep, Energy"
+              placeholder="например: Стресс, Сон, Энергия"
               required
               data-testid="visit-topic-input"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="visit-notes">Notes</Label>
+            <Label htmlFor="visit-notes">Заметки</Label>
             <Textarea
               id="visit-notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Session notes..."
+              placeholder="Заметки о сеансе..."
               rows={4}
               data-testid="visit-notes-input"
             />
@@ -440,11 +452,11 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
         </div>
         <DialogFooter>
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            Отмена
           </Button>
           <Button type="submit" disabled={loading} data-testid="visit-form-submit">
             {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-            {visit ? 'Update' : 'Add'} Visit
+            {visit ? 'Сохранить' : 'Добавить'}
           </Button>
         </DialogFooter>
       </form>

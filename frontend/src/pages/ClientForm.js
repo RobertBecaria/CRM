@@ -8,6 +8,9 @@ import { Label } from '../components/ui/label';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import dayjs from 'dayjs';
+import 'dayjs/locale/ru';
+
+dayjs.locale('ru');
 
 export default function ClientForm() {
   const { id } = useParams();
@@ -34,7 +37,7 @@ export default function ClientForm() {
       setLastName(client.last_name);
       setDob(client.dob);
     } catch (err) {
-      toast.error('Failed to load client');
+      toast.error('Не удалось загрузить клиента');
       navigate('/clients');
     } finally {
       setFetchLoading(false);
@@ -54,19 +57,28 @@ export default function ClientForm() {
 
       if (isEditing) {
         await clientsApi.update(id, data);
-        toast.success('Client updated successfully');
+        toast.success('Клиент обновлён');
         navigate(`/clients/${id}`);
       } else {
         const response = await clientsApi.create(data);
-        toast.success('Client created successfully');
+        toast.success('Клиент добавлен');
         navigate(`/clients/${response.data.id}`);
       }
     } catch (err) {
-      const message = err.response?.data?.detail || 'An error occurred';
+      const message = err.response?.data?.detail || 'Произошла ошибка';
       toast.error(message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getYearWord = (age) => {
+    const lastDigit = age % 10;
+    const lastTwoDigits = age % 100;
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return 'лет';
+    if (lastDigit === 1) return 'год';
+    if (lastDigit >= 2 && lastDigit <= 4) return 'года';
+    return 'лет';
   };
 
   if (fetchLoading) {
@@ -76,7 +88,7 @@ export default function ClientForm() {
           <Card className="card-shadow">
             <CardContent className="py-12 text-center">
               <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-              <p className="text-muted-foreground mt-2">Loading client...</p>
+              <p className="text-muted-foreground mt-2">Загрузка клиента...</p>
             </CardContent>
           </Card>
         </div>
@@ -92,19 +104,19 @@ export default function ClientForm() {
         className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
-        {isEditing ? 'Back to Client' : 'Back to Clients'}
+        {isEditing ? 'Назад к клиенту' : 'Назад к клиентам'}
       </Link>
 
       <div className="max-w-2xl mx-auto">
         <Card className="card-shadow">
           <CardHeader>
             <CardTitle data-testid="client-form-title">
-              {isEditing ? 'Edit Client' : 'Add New Client'}
+              {isEditing ? 'Редактировать клиента' : 'Новый клиент'}
             </CardTitle>
             <CardDescription>
               {isEditing 
-                ? 'Update the client\'s information' 
-                : 'Enter the client\'s details to add them to your records'
+                ? 'Обновите информацию о клиенте' 
+                : 'Введите данные клиента для добавления в базу'
               }
             </CardDescription>
           </CardHeader>
@@ -112,24 +124,24 @@ export default function ClientForm() {
             <form onSubmit={handleSubmit} className="space-y-6" data-testid="client-form">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
+                  <Label htmlFor="firstName">Имя</Label>
                   <Input
                     id="firstName"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="John"
+                    placeholder="Анна"
                     required
                     maxLength={100}
                     data-testid="client-first-name-input"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
+                  <Label htmlFor="lastName">Фамилия</Label>
                   <Input
                     id="lastName"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Doe"
+                    placeholder="Иванова"
                     required
                     maxLength={100}
                     data-testid="client-last-name-input"
@@ -138,7 +150,7 @@ export default function ClientForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dob">Date of Birth</Label>
+                <Label htmlFor="dob">Дата рождения</Label>
                 <Input
                   id="dob"
                   type="date"
@@ -150,7 +162,7 @@ export default function ClientForm() {
                 />
                 {dob && (
                   <p className="text-sm text-muted-foreground">
-                    Age: {dayjs().diff(dayjs(dob), 'year')} years old
+                    Возраст: {dayjs().diff(dayjs(dob), 'year')} {getYearWord(dayjs().diff(dayjs(dob), 'year'))}
                   </p>
                 )}
               </div>
@@ -162,7 +174,7 @@ export default function ClientForm() {
                   onClick={() => navigate(isEditing ? `/clients/${id}` : '/clients')}
                   className="flex-1"
                 >
-                  Cancel
+                  Отмена
                 </Button>
                 <Button
                   type="submit"
@@ -171,9 +183,9 @@ export default function ClientForm() {
                   data-testid="client-form-submit"
                 >
                   {loading ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Сохранение...</>
                   ) : (
-                    isEditing ? 'Save Changes' : 'Add Client'
+                    isEditing ? 'Сохранить' : 'Добавить клиента'
                   )}
                 </Button>
               </div>
