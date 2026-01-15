@@ -10,6 +10,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, Search, Edit, Trash2, User, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { toast } from 'sonner';
 import dayjs from 'dayjs';
+import 'dayjs/locale/ru';
+
+dayjs.locale('ru');
 
 export default function ClientList() {
   const [clients, setClients] = useState([]);
@@ -36,7 +39,7 @@ export default function ClientList() {
       setTotalPages(response.data.total_pages);
       setTotal(response.data.total);
     } catch (err) {
-      toast.error('Failed to load clients');
+      toast.error('Не удалось загрузить клиентов');
       console.error(err);
     } finally {
       setLoading(false);
@@ -51,12 +54,21 @@ export default function ClientList() {
   const handleDelete = async (clientId) => {
     try {
       await clientsApi.delete(clientId);
-      toast.success('Client deleted successfully');
+      toast.success('Клиент удалён');
       fetchClients();
     } catch (err) {
-      toast.error('Failed to delete client');
+      toast.error('Не удалось удалить клиента');
       console.error(err);
     }
+  };
+
+  const getClientWord = (count) => {
+    const lastDigit = count % 10;
+    const lastTwoDigits = count % 100;
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return 'клиентов';
+    if (lastDigit === 1) return 'клиент';
+    if (lastDigit >= 2 && lastDigit <= 4) return 'клиента';
+    return 'клиентов';
   };
 
   return (
@@ -65,16 +77,16 @@ export default function ClientList() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold text-[hsl(var(--foreground))]" data-testid="clients-page-title">
-            Clients
+            Клиенты
           </h1>
           <p className="text-muted-foreground mt-1">
-            {total} {total === 1 ? 'client' : 'clients'} total
+            {total} {getClientWord(total)} всего
           </p>
         </div>
         <Link to="/clients/new">
           <Button className="btn-press" data-testid="add-client-button">
             <Plus className="w-4 h-4 mr-2" />
-            Add Client
+            Добавить клиента
           </Button>
         </Link>
       </div>
@@ -85,7 +97,7 @@ export default function ClientList() {
           <div className="relative" data-testid="client-filters">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name..."
+              placeholder="Поиск по имени..."
               value={search}
               onChange={handleSearch}
               className="pl-10 pr-10"
@@ -117,19 +129,19 @@ export default function ClientList() {
                 <User className="w-8 h-8 text-muted-foreground" />
               </div>
               <h3 className="text-lg font-semibold mb-2">
-                {search ? 'No clients found' : 'No clients yet'}
+                {search ? 'Клиенты не найдены' : 'Клиентов пока нет'}
               </h3>
               <p className="text-muted-foreground mb-4 max-w-sm">
                 {search
-                  ? 'Try adjusting your search term'
-                  : 'Add your first client to start tracking their visits'
+                  ? 'Попробуйте изменить условия поиска'
+                  : 'Добавьте первого клиента для начала работы'
                 }
               </p>
               {!search && (
                 <Link to="/clients/new">
                   <Button data-testid="empty-add-client-button">
                     <Plus className="w-4 h-4 mr-2" />
-                    Add First Client
+                    Добавить первого клиента
                   </Button>
                 </Link>
               )}
@@ -142,10 +154,10 @@ export default function ClientList() {
               <Table data-testid="clients-table">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Date of Birth</TableHead>
-                    <TableHead>Age</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Имя</TableHead>
+                    <TableHead>Дата рождения</TableHead>
+                    <TableHead>Возраст</TableHead>
+                    <TableHead className="text-right">Действия</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -160,10 +172,10 @@ export default function ClientList() {
                         {client.first_name} {client.last_name}
                       </TableCell>
                       <TableCell>
-                        {dayjs(client.dob).format('MMM D, YYYY')}
+                        {dayjs(client.dob).format('D MMMM YYYY')}
                       </TableCell>
                       <TableCell>
-                        {calculateAge(client.dob)} years
+                        {calculateAge(client.dob)} {getYearWord(calculateAge(client.dob))}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
@@ -200,7 +212,7 @@ export default function ClientList() {
                         {client.first_name} {client.last_name}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        DOB: {dayjs(client.dob).format('MMM D, YYYY')} ({calculateAge(client.dob)} years)
+                        Дата рождения: {dayjs(client.dob).format('D MMMM YYYY')} ({calculateAge(client.dob)} {getYearWord(calculateAge(client.dob))})
                       </p>
                     </div>
                     <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
@@ -224,7 +236,7 @@ export default function ClientList() {
             {totalPages > 1 && (
               <div className="flex items-center justify-between px-4 py-3 border-t">
                 <p className="text-sm text-muted-foreground">
-                  Page {page} of {totalPages}
+                  Страница {page} из {totalPages}
                 </p>
                 <div className="flex gap-2">
                   <Button
@@ -265,19 +277,19 @@ function DeleteClientDialog({ clientName, onConfirm, clientId }) {
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete client?</AlertDialogTitle>
+          <AlertDialogTitle>Удалить клиента?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete <strong>{clientName}</strong> and all their visit records. This action cannot be undone.
+            Это навсегда удалит <strong>{clientName}</strong> и все записи о визитах. Это действие нельзя отменить.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel data-testid="delete-client-cancel-button">Cancel</AlertDialogCancel>
+          <AlertDialogCancel data-testid="delete-client-cancel-button">Отмена</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             data-testid="delete-client-confirm-button"
           >
-            Delete
+            Удалить
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -304,4 +316,13 @@ function calculateAge(dob) {
   const birthDate = dayjs(dob);
   const today = dayjs();
   return today.diff(birthDate, 'year');
+}
+
+function getYearWord(age) {
+  const lastDigit = age % 10;
+  const lastTwoDigits = age % 100;
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return 'лет';
+  if (lastDigit === 1) return 'год';
+  if (lastDigit >= 2 && lastDigit <= 4) return 'года';
+  return 'лет';
 }

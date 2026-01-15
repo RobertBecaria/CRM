@@ -30,8 +30,12 @@ export default function Login() {
       }
       navigate('/dashboard');
     } catch (err) {
-      const message = err.response?.data?.detail || 'An error occurred. Please try again.';
-      setError(message);
+      const message = err.response?.data?.detail || 'Произошла ошибка. Попробуйте снова.';
+      // Translate common error messages
+      const translatedMessage = message
+        .replace('Invalid email or password', 'Неверный email или пароль')
+        .replace('Admin user already exists. Registration disabled.', 'Администратор уже существует. Регистрация отключена.');
+      setError(translatedMessage);
     } finally {
       setLoading(false);
     }
@@ -47,16 +51,16 @@ export default function Login() {
               <Heart className="w-12 h-12 text-[hsl(var(--primary))]" />
             </div>
             <h1 className="text-4xl font-bold text-[hsl(var(--foreground))] mb-4 font-['Space_Grotesk']">
-              KinesioCRM
+              КинезиоCRM
             </h1>
             <p className="text-lg text-[hsl(var(--muted-foreground))] max-w-md">
-              Your personal client management system for holistic wellness practice
+              Ваша персональная система управления клиентами для практики психокинезиологии
             </p>
           </div>
         </div>
         <img 
           src="https://images.unsplash.com/photo-1655435600406-6968a32a3a34?crop=entropy&cs=srgb&fm=jpg&q=85&w=1200" 
-          alt="Calming water texture" 
+          alt="Спокойная текстура воды" 
           className="absolute inset-0 w-full h-full object-cover opacity-20"
         />
       </div>
@@ -69,12 +73,12 @@ export default function Login() {
               <Heart className="w-8 h-8 text-white" />
             </div>
             <CardTitle className="text-2xl font-semibold tracking-tight">
-              {isRegister ? 'Create Account' : 'Welcome back'}
+              {isRegister ? 'Создать аккаунт' : 'Добро пожаловать'}
             </CardTitle>
             <CardDescription>
               {isRegister 
-                ? 'Set up your admin account to get started' 
-                : 'Sign in to manage your clients'
+                ? 'Настройте свой аккаунт администратора' 
+                : 'Войдите для управления клиентами'
               }
             </CardDescription>
           </CardHeader>
@@ -102,7 +106,7 @@ export default function Login() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Пароль</Label>
                 <Input
                   id="password"
                   type="password"
@@ -123,35 +127,35 @@ export default function Login() {
                 data-testid="login-form-submit-button"
               >
                 {loading ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Подождите</>
                 ) : (
-                  isRegister ? 'Create Account' : 'Sign in'
+                  isRegister ? 'Создать аккаунт' : 'Войти'
                 )}
               </Button>
 
               <div className="text-center text-sm text-muted-foreground">
                 {isRegister ? (
                   <p>
-                    Already have an account?{' '}
+                    Уже есть аккаунт?{' '}
                     <button 
                       type="button"
                       onClick={() => { setIsRegister(false); setError(''); }}
                       className="text-[hsl(var(--primary))] hover:underline"
                       data-testid="switch-to-login"
                     >
-                      Sign in
+                      Войти
                     </button>
                   </p>
                 ) : (
                   <p>
-                    First time?{' '}
+                    Первый раз?{' '}
                     <button 
                       type="button"
                       onClick={() => { setIsRegister(true); setError(''); }}
                       className="text-[hsl(var(--primary))] hover:underline"
                       data-testid="switch-to-register"
                     >
-                      Create admin account
+                      Создать аккаунт администратора
                     </button>
                   </p>
                 )}

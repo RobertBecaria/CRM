@@ -6,9 +6,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Heart, LayoutDashboard, Users, BarChart3, LogOut, Menu, X, User } from 'lucide-react';
 
 const navItems = [
-  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/clients', label: 'Clients', icon: Users },
-  { path: '/statistics', label: 'Statistics', icon: BarChart3 },
+  { path: '/dashboard', label: 'Главная', icon: LayoutDashboard },
+  { path: '/clients', label: 'Клиенты', icon: Users },
+  { path: '/statistics', label: 'Статистика', icon: BarChart3 },
 ];
 
 export default function Layout({ children }) {
@@ -32,7 +32,7 @@ export default function Layout({ children }) {
             <div className="w-9 h-9 bg-[hsl(var(--primary))] rounded-lg flex items-center justify-center">
               <Heart className="w-5 h-5 text-white" />
             </div>
-            <span className="font-semibold text-lg hidden sm:inline font-['Space_Grotesk']">KinesioCRM</span>
+            <span className="font-semibold text-lg hidden sm:inline font-['Space_Grotesk']">КинезиоCRM</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -72,7 +72,7 @@ export default function Layout({ children }) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive" data-testid="logout-button">
                   <LogOut className="w-4 h-4 mr-2" />
-                  Sign out
+                  Выйти
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -125,7 +125,7 @@ export default function Layout({ children }) {
       {/* Footer */}
       <footer className="border-t bg-white py-4">
         <div className="container-responsive text-center text-sm text-muted-foreground">
-          <p>KinesioCRM © {new Date().getFullYear()} • Your wellness practice companion</p>
+          <p>КинезиоCRM © {new Date().getFullYear()} • Ваш помощник в практике психокинезиологии</p>
         </div>
       </footer>
     </div>

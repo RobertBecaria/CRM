@@ -8,6 +8,9 @@ import { Badge } from '../components/ui/badge';
 import { Users, Calendar, TrendingUp, Activity, Plus, ArrowRight } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar } from 'recharts';
 import dayjs from 'dayjs';
+import 'dayjs/locale/ru';
+
+dayjs.locale('ru');
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -24,7 +27,7 @@ export default function Dashboard() {
       const response = await statsApi.getOverview();
       setStats(response.data);
     } catch (err) {
-      setError('Failed to load dashboard data');
+      setError('Не удалось загрузить данные');
       console.error(err);
     } finally {
       setLoading(false);
@@ -41,7 +44,7 @@ export default function Dashboard() {
         <Card className="card-shadow">
           <CardContent className="py-12 text-center">
             <p className="text-destructive mb-4">{error}</p>
-            <Button onClick={fetchStats}>Retry</Button>
+            <Button onClick={fetchStats}>Повторить</Button>
           </CardContent>
         </Card>
       </div>
@@ -54,14 +57,14 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-[hsl(var(--foreground))]" data-testid="dashboard-title">
-            Dashboard
+            Главная
           </h1>
-          <p className="text-muted-foreground mt-1">Overview of your practice</p>
+          <p className="text-muted-foreground mt-1">Обзор вашей практики</p>
         </div>
         <Link to="/clients/new">
           <Button className="btn-press" data-testid="add-client-button">
             <Plus className="w-4 h-4 mr-2" />
-            Add Client
+            Добавить клиента
           </Button>
         </Link>
       </div>
@@ -69,28 +72,28 @@ export default function Dashboard() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
         <KPICard
-          title="Total Clients"
+          title="Всего клиентов"
           value={stats?.total_clients || 0}
           icon={Users}
           delay="stagger-1"
           testId="kpi-total-clients"
         />
         <KPICard
-          title="Visits YTD"
+          title="Визитов за год"
           value={stats?.visits_ytd || 0}
           icon={Calendar}
           delay="stagger-2"
           testId="kpi-visits-ytd"
         />
         <KPICard
-          title="Last 30 Days"
+          title="За 30 дней"
           value={stats?.visits_last_30 || 0}
           icon={TrendingUp}
           delay="stagger-3"
           testId="kpi-visits-30"
         />
         <KPICard
-          title="Active Topics"
+          title="Активных тем"
           value={stats?.top_topics?.length || 0}
           icon={Activity}
           delay="stagger-4"
@@ -103,8 +106,8 @@ export default function Dashboard() {
         {/* Visits Over Time Chart */}
         <Card className="lg:col-span-8 card-shadow animate-fade-in-up">
           <CardHeader>
-            <CardTitle className="text-lg">Visits Over Time</CardTitle>
-            <CardDescription>Last 12 months activity</CardDescription>
+            <CardTitle className="text-lg">Визиты по времени</CardTitle>
+            <CardDescription>Активность за последние 12 месяцев</CardDescription>
           </CardHeader>
           <CardContent>
             {stats?.visits_over_time?.length > 0 ? (
@@ -121,13 +124,14 @@ export default function Dashboard() {
                       stroke="hsl(187 45% 38%)" 
                       strokeWidth={2} 
                       dot={false} 
+                      name="Визиты"
                     />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             ) : (
               <div className="h-64 flex items-center justify-center text-muted-foreground" data-testid="chart-empty">
-                No visit data yet. Add visits to see trends.
+                Пока нет данных о визитах. Добавьте визиты для просмотра статистики.
               </div>
             )}
           </CardContent>
@@ -136,8 +140,8 @@ export default function Dashboard() {
         {/* Top Topics */}
         <Card className="lg:col-span-4 card-shadow animate-fade-in-up stagger-2">
           <CardHeader>
-            <CardTitle className="text-lg">Top Topics</CardTitle>
-            <CardDescription>Most common visit topics</CardDescription>
+            <CardTitle className="text-lg">Популярные темы</CardTitle>
+            <CardDescription>Самые частые темы визитов</CardDescription>
           </CardHeader>
           <CardContent>
             {stats?.top_topics?.length > 0 ? (
@@ -153,12 +157,12 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="py-8 text-center text-muted-foreground text-sm">
-                No topics recorded yet
+                Темы ещё не записаны
               </div>
             )}
             <Link to="/statistics" className="block mt-4">
               <Button variant="outline" className="w-full" data-testid="view-all-topics-button">
-                View All Statistics
+                Вся статистика
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
@@ -169,12 +173,12 @@ export default function Dashboard() {
         <Card className="lg:col-span-12 card-shadow animate-fade-in-up stagger-3">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-lg">Recent Visits</CardTitle>
-              <CardDescription>Latest recorded visits</CardDescription>
+              <CardTitle className="text-lg">Последние визиты</CardTitle>
+              <CardDescription>Недавно записанные визиты</CardDescription>
             </div>
             <Link to="/clients">
               <Button variant="ghost" size="sm" data-testid="view-all-clients-button">
-                View All Clients
+                Все клиенты
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
@@ -189,21 +193,21 @@ export default function Dashboard() {
                         to={`/clients/${visit.client_id}`}
                         className="font-medium text-[hsl(var(--primary))] hover:underline"
                       >
-                        {visit.client_name || 'Unknown Client'}
+                        {visit.client_name || 'Неизвестный клиент'}
                       </Link>
                       <p className="text-sm text-muted-foreground truncate max-w-md">
                         {visit.topic}
                       </p>
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {dayjs(visit.date).format('MMM D, YYYY')}
+                      {dayjs(visit.date).format('D MMMM YYYY')}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="py-8 text-center text-muted-foreground text-sm">
-                No visits recorded yet. Add your first visit to see it here.
+                Визиты ещё не записаны. Добавьте первый визит для отображения здесь.
               </div>
             )}
           </CardContent>
