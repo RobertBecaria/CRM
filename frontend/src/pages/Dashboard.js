@@ -1,0 +1,268 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { statsApi } from '../lib/api';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Skeleton } from '../components/ui/skeleton';
+import { Badge } from '../components/ui/badge';
+import { Users, Calendar, TrendingUp, Activity, Plus, ArrowRight } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar } from 'recharts';
+import dayjs from 'dayjs';
+
+export default function Dashboard() {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      const response = await statsApi.getOverview();
+      setStats(response.data);
+    } catch (err) {
+      setError('Failed to load dashboard data');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <DashboardSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="container-responsive py-8">
+        <Card className="card-shadow">
+          <CardContent className="py-12 text-center">
+            <p className="text-destructive mb-4">{error}</p>
+            <Button onClick={fetchStats}>Retry</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container-responsive py-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-[hsl(var(--foreground))]" data-testid="dashboard-title">
+            Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-1">Overview of your practice</p>
+        </div>
+        <Link to="/clients/new">
+          <Button className="btn-press" data-testid="add-client-button">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Client
+          </Button>
+        </Link>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+        <KPICard
+          title="Total Clients"
+          value={stats?.total_clients || 0}
+          icon={Users}
+          delay="stagger-1"
+          testId="kpi-total-clients"
+        />
+        <KPICard
+          title="Visits YTD"
+          value={stats?.visits_ytd || 0}
+          icon={Calendar}
+          delay="stagger-2"
+          testId="kpi-visits-ytd"
+        />
+        <KPICard
+          title="Last 30 Days"
+          value={stats?.visits_last_30 || 0}
+          icon={TrendingUp}
+          delay="stagger-3"
+          testId="kpi-visits-30"
+        />
+        <KPICard
+          title="Active Topics"
+          value={stats?.top_topics?.length || 0}
+          icon={Activity}
+          delay="stagger-4"
+          testId="kpi-topics"
+        />
+      </div>
+
+      {/* Charts and Lists */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Visits Over Time Chart */}
+        <Card className="lg:col-span-8 card-shadow animate-fade-in-up">
+          <CardHeader>
+            <CardTitle className="text-lg">Visits Over Time</CardTitle>
+            <CardDescription>Last 12 months activity</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {stats?.visits_over_time?.length > 0 ? (
+              <div className="h-64 w-full" data-testid="visits-over-time-chart">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={stats.visits_over_time} margin={{ left: 8, right: 16, top: 8, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E6F0EE" />
+                    <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Line 
+                      type="monotone" 
+                      dataKey="visits" 
+                      stroke="hsl(187 45% 38%)" 
+                      strokeWidth={2} 
+                      dot={false} 
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-64 flex items-center justify-center text-muted-foreground" data-testid="chart-empty">
+                No visit data yet. Add visits to see trends.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Top Topics */}
+        <Card className="lg:col-span-4 card-shadow animate-fade-in-up stagger-2">
+          <CardHeader>
+            <CardTitle className="text-lg">Top Topics</CardTitle>
+            <CardDescription>Most common visit topics</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {stats?.top_topics?.length > 0 ? (
+              <div className="space-y-3" data-testid="top-topics-list">
+                {stats.top_topics.map((topic, index) => (
+                  <div key={topic.topic} className="flex items-center justify-between">
+                    <span className="text-sm truncate flex-1 mr-2">{topic.topic}</span>
+                    <Badge variant="secondary" className="shrink-0">
+                      {topic.count}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-muted-foreground text-sm">
+                No topics recorded yet
+              </div>
+            )}
+            <Link to="/statistics" className="block mt-4">
+              <Button variant="outline" className="w-full" data-testid="view-all-topics-button">
+                View All Statistics
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* Recent Visits */}
+        <Card className="lg:col-span-12 card-shadow animate-fade-in-up stagger-3">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg">Recent Visits</CardTitle>
+              <CardDescription>Latest recorded visits</CardDescription>
+            </div>
+            <Link to="/clients">
+              <Button variant="ghost" size="sm" data-testid="view-all-clients-button">
+                View All Clients
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {stats?.recent_visits?.length > 0 ? (
+              <div className="divide-y" data-testid="recent-visits-list">
+                {stats.recent_visits.map((visit) => (
+                  <div key={visit.id} className="py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                    <div className="flex-1">
+                      <Link 
+                        to={`/clients/${visit.client_id}`}
+                        className="font-medium text-[hsl(var(--primary))] hover:underline"
+                      >
+                        {visit.client_name || 'Unknown Client'}
+                      </Link>
+                      <p className="text-sm text-muted-foreground truncate max-w-md">
+                        {visit.topic}
+                      </p>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {dayjs(visit.date).format('MMM D, YYYY')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-muted-foreground text-sm">
+                No visits recorded yet. Add your first visit to see it here.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function KPICard({ title, value, icon: Icon, delay, testId }) {
+  return (
+    <Card className={`card-shadow animate-fade-in-up ${delay}`} data-testid={testId}>
+      <CardContent className="pt-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-muted-foreground">{title}</p>
+            <p className="text-3xl font-bold text-[hsl(var(--foreground))] mt-1">{value}</p>
+          </div>
+          <div className="w-12 h-12 bg-[hsl(var(--primary)/0.1)] rounded-lg flex items-center justify-center">
+            <Icon className="w-6 h-6 text-[hsl(var(--primary))]" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="container-responsive py-8">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+        <Skeleton className="h-10 w-32" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} className="card-shadow">
+            <CardContent className="pt-6">
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-8 w-16" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <Card className="lg:col-span-8">
+          <CardContent className="py-6">
+            <Skeleton className="h-64 w-full" />
+          </CardContent>
+        </Card>
+        <Card className="lg:col-span-4">
+          <CardContent className="py-6">
+            <Skeleton className="h-64 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
