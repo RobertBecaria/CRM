@@ -1,15 +1,15 @@
 [
   {
     "content": "Phase 2: Get design guidelines from design_agent",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Phase 2: Backend Implementation (auth, clients, visits, stats APIs)",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Phase 2: Frontend Implementation (login, dashboard, clients, visits, statistics pages)",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Phase 2: All user stories covered in development",
