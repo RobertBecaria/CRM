@@ -155,8 +155,38 @@
 - `DELETE /api/retreats/{id}/expenses/{expense_id}` — Remove expense
 - `GET /api/stats/retreats` — Get retreat statistics
 
+## Phase 6: Calendar Feature ✅ COMPLETE
+
+### Completed Features:
+1. ✅ **Calendar Page** — New section in navigation (between "Ретриты" and "Статистика")
+2. ✅ **Three View Modes**:
+   - Month view (default) — full month grid with event indicators
+   - Week view — 7-day detailed view
+   - Day view — full list of events for selected day
+3. ✅ **Event Display**:
+   - Client visits (teal color) with client name, topic, practices, price
+   - Retreats (purple color) spanning multiple days
+4. ✅ **Navigation**:
+   - Previous/Next buttons
+   - "Today" quick button
+   - Current period display
+5. ✅ **Event Filtering** — All events, visits only, or retreats only
+6. ✅ **Quick Add Visit** — Add visit directly from calendar with date pre-filled
+7. ✅ **Day Detail Dialog** — Click on day to see all events
+8. ✅ **Future Planning** — Can schedule visits for any date
+9. ✅ **Backend API** — `/api/calendar/events` endpoint with date range filtering
+
+### Calendar Views:
+- **Month**: Grid layout, event badges, today highlighted
+- **Week**: Column layout per day, detailed event cards
+- **Day**: Full event list with all details (client, topic, practices, price)
+
 ## 3) Current Status
-**Phase 5 is COMPLETE.** The CRM is fully functional with:
+**Phase 6 is COMPLETE.** The CRM now includes:
+- Full calendar functionality with month/week/day views
+- Quick visit scheduling from calendar
+- Event filtering and navigation
+- Visual distinction between visits and retreats
 - Authentication system (single admin)
 - Dashboard with KPIs, charts, practice & retreat statistics
 - Full client management (CRUD + search + middle name)
