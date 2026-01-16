@@ -691,7 +691,7 @@ async def get_yearly_summary(
             
             client_summaries.append({
                 "client_id": client_id,
-                "client_name": f"{client['first_name']} {client['last_name']}",
+                "client_name": format_client_name(client),
                 "visit_count": visit_data["visit_count"],
                 "total_revenue": visit_data["total_revenue"],
                 "total_tips": visit_data["total_tips"],
