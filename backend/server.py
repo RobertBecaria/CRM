@@ -397,6 +397,7 @@ async def create_visit(
         "client_id": client_id,
         "date": visit_data.date,
         "topic": visit_data.topic,
+        "practices": visit_data.practices or [],
         "notes": visit_data.notes or "",
         "price": visit_data.price,
         "tips": visit_data.tips,
