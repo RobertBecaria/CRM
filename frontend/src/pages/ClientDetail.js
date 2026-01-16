@@ -207,6 +207,19 @@ export default function ClientDetail() {
                 {calculateAge(client?.dob)} {getYearWord(calculateAge(client?.dob))}
               </p>
             </div>
+            {client?.phone && (
+              <div>
+                <p className="text-sm text-muted-foreground">Телефон</p>
+                <a 
+                  href={`tel:${client.phone}`} 
+                  className="font-medium text-[hsl(var(--primary))] hover:underline flex items-center gap-2"
+                  data-testid="client-phone"
+                >
+                  <Phone className="w-4 h-4" />
+                  {client.phone}
+                </a>
+              </div>
+            )}
             <div>
               <p className="text-sm text-muted-foreground">Всего визитов</p>
               <p className="text-2xl font-bold text-[hsl(var(--primary))]" data-testid="client-visit-count">
