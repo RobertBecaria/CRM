@@ -5,12 +5,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button';
 import { Skeleton } from '../components/ui/skeleton';
 import { Badge } from '../components/ui/badge';
-import { Users, Calendar, TrendingUp, Activity, Plus, ArrowRight } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar } from 'recharts';
+import { Users, Calendar, TrendingUp, Activity, Plus, ArrowRight, Banknote, Gift, Wallet } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 
 dayjs.locale('ru');
+
+// Format currency
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(amount);
+}
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -51,6 +56,8 @@ export default function Dashboard() {
     );
   }
 
+  const financial = stats?.financial || {};
+
   return (
     <div className="container-responsive py-8">
       {/* Header */}
@@ -69,8 +76,8 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+      {/* Main KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
         <KPICard
           title="Всего клиентов"
           value={stats?.total_clients || 0}
@@ -98,6 +105,42 @@ export default function Dashboard() {
           icon={Activity}
           delay="stagger-4"
           testId="kpi-topics"
+        />
+      </div>
+
+      {/* Financial KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+        <FinancialCard
+          title="Доход за год"
+          value={formatCurrency(financial.revenue_ytd || 0)}
+          icon={Banknote}
+          color="primary"
+          delay="stagger-1"
+          testId="kpi-revenue-ytd"
+        />
+        <FinancialCard
+          title="Доход за 30 дней"
+          value={formatCurrency(financial.revenue_last_30 || 0)}
+          icon={Wallet}
+          color="chart-2"
+          delay="stagger-2"
+          testId="kpi-revenue-30"
+        />
+        <FinancialCard
+          title="Чаевые за год"
+          value={formatCurrency(financial.tips_ytd || 0)}
+          icon={Gift}
+          color="chart-3"
+          delay="stagger-3"
+          testId="kpi-tips-ytd"
+        />
+        <FinancialCard
+          title="Средний чек"
+          value={formatCurrency(financial.avg_check || 0)}
+          icon={TrendingUp}
+          color="success"
+          delay="stagger-4"
+          testId="kpi-avg-check"
         />
       </div>
 
@@ -199,8 +242,13 @@ export default function Dashboard() {
                         {visit.topic}
                       </p>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {dayjs(visit.date).format('D MMMM YYYY')}
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm font-medium">
+                        {formatCurrency(visit.price ?? 15000)}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        {dayjs(visit.date).format('D MMMM YYYY')}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -235,6 +283,24 @@ function KPICard({ title, value, icon: Icon, delay, testId }) {
   );
 }
 
+function FinancialCard({ title, value, icon: Icon, color, delay, testId }) {
+  return (
+    <Card className={`card-shadow animate-fade-in-up ${delay}`} data-testid={testId}>
+      <CardContent className="pt-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-muted-foreground">{title}</p>
+            <p className="text-2xl font-bold text-[hsl(var(--foreground))] mt-1">{value}</p>
+          </div>
+          <div className={`w-12 h-12 bg-[hsl(var(--${color})/0.1)] rounded-lg flex items-center justify-center`}>
+            <Icon className={`w-6 h-6 text-[hsl(var(--${color}))]`} />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function DashboardSkeleton() {
   return (
     <div className="container-responsive py-8">
@@ -245,12 +311,22 @@ function DashboardSkeleton() {
         </div>
         <Skeleton className="h-10 w-32" />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
         {[1, 2, 3, 4].map((i) => (
           <Card key={i} className="card-shadow">
             <CardContent className="pt-6">
               <Skeleton className="h-4 w-24 mb-2" />
               <Skeleton className="h-8 w-16" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} className="card-shadow">
+            <CardContent className="pt-6">
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-8 w-20" />
             </CardContent>
           </Card>
         ))}
