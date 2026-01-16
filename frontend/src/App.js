@@ -10,6 +10,7 @@ import ClientDetail from './pages/ClientDetail';
 import ClientForm from './pages/ClientForm';
 import RetreatList from './pages/RetreatList';
 import RetreatDetail from './pages/RetreatDetail';
+import CalendarPage from './pages/Calendar';
 import Statistics from './pages/Statistics';
 import './App.css';
 
