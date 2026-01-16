@@ -216,7 +216,7 @@ export default function ClientList() {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-medium">
-                        {client.first_name} {client.last_name}
+                        {formatClientName(client)}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         Дата рождения: {dayjs(client.dob).format('D MMMM YYYY')} ({calculateAge(client.dob)} {getYearWord(calculateAge(client.dob))})
@@ -229,7 +229,7 @@ export default function ClientList() {
                         </Button>
                       </Link>
                       <DeleteClientDialog
-                        clientName={`${client.first_name} ${client.last_name}`}
+                        clientName={formatClientName(client)}
                         onConfirm={() => handleDelete(client.id)}
                         clientId={client.id}
                       />
