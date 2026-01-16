@@ -10,13 +10,26 @@ import { Skeleton } from '../components/ui/skeleton';
 import { Badge } from '../components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../components/ui/alert-dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { ArrowLeft, Calendar, Edit, Trash2, Plus, User, FileText, X, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Edit, Trash2, Plus, User, FileText, X, ChevronLeft, ChevronRight, Loader2, Banknote, Gift, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 
 dayjs.locale('ru');
+
+const DEFAULT_PRICE = 15000;
+
+// Helper function to get payment status
+function getPaymentStatus(price) {
+  if (price === 0) return { label: 'Благотворительность', variant: 'outline', icon: Heart };
+  if (price < DEFAULT_PRICE) return { label: 'Скидка', variant: 'secondary', icon: Gift };
+  return { label: 'Обычный', variant: 'default', icon: Banknote };
+}
+
+// Format currency
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(amount);
+}
 
 export default function ClientDetail() {
   const { id } = useParams();
@@ -104,6 +117,10 @@ export default function ClientDetail() {
   };
 
   const hasFilters = dateFrom || dateTo || topicFilter;
+
+  // Calculate totals for displayed visits
+  const totalRevenue = visits.reduce((sum, v) => sum + (v.price ?? DEFAULT_PRICE), 0);
+  const totalTips = visits.reduce((sum, v) => sum + (v.tips ?? 0), 0);
 
   if (loading) {
     return <ClientDetailSkeleton />;
@@ -260,6 +277,22 @@ export default function ClientDetail() {
                   </div>
                 )}
               </div>
+
+              {/* Financial summary for filtered visits */}
+              {visits.length > 0 && (
+                <div className="flex flex-wrap gap-4 p-3 bg-muted/50 rounded-lg mb-4">
+                  <div className="flex items-center gap-2">
+                    <Banknote className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Доход:</span>
+                    <span className="font-medium">{formatCurrency(totalRevenue)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Gift className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Чаевые:</span>
+                    <span className="font-medium">{formatCurrency(totalTips)}</span>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -288,62 +321,85 @@ export default function ClientDetail() {
                 </div>
               ) : (
                 <div className="divide-y" data-testid="visits-list">
-                  {visits.map((visit) => (
-                    <div key={visit.id} className="py-4 first:pt-0 last:pb-0" data-testid={`visit-${visit.id}`}>
-                      <div className="flex justify-between items-start gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Calendar className="w-4 h-4 text-muted-foreground" />
-                            <span className="font-medium">
-                              {dayjs(visit.date).format('D MMMM YYYY')}
-                            </span>
+                  {visits.map((visit) => {
+                    const price = visit.price ?? DEFAULT_PRICE;
+                    const tips = visit.tips ?? 0;
+                    const status = getPaymentStatus(price);
+                    const StatusIcon = status.icon;
+                    
+                    return (
+                      <div key={visit.id} className="py-4 first:pt-0 last:pb-0" data-testid={`visit-${visit.id}`}>
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Calendar className="w-4 h-4 text-muted-foreground" />
+                              <span className="font-medium">
+                                {dayjs(visit.date).format('D MMMM YYYY')}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                              <Badge variant="secondary">
+                                {visit.topic}
+                              </Badge>
+                              <Badge variant={status.variant} className="flex items-center gap-1">
+                                <StatusIcon className="w-3 h-3" />
+                                {status.label}
+                              </Badge>
+                            </div>
+                            <div className="flex flex-wrap gap-4 text-sm mb-2">
+                              <span className="text-muted-foreground">
+                                Оплата: <span className="font-medium text-foreground">{formatCurrency(price)}</span>
+                              </span>
+                              {tips > 0 && (
+                                <span className="text-muted-foreground">
+                                  Чаевые: <span className="font-medium text-[hsl(var(--success))]">{formatCurrency(tips)}</span>
+                                </span>
+                              )}
+                            </div>
+                            {visit.notes && (
+                              <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">
+                                {visit.notes}
+                              </p>
+                            )}
                           </div>
-                          <Badge variant="secondary" className="mb-2">
-                            {visit.topic}
-                          </Badge>
-                          {visit.notes && (
-                            <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">
-                              {visit.notes}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => { setEditingVisit(visit); setVisitDialogOpen(true); }}
-                            data-testid={`edit-visit-${visit.id}`}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" data-testid={`delete-visit-${visit.id}`}>
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Удалить визит?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Это навсегда удалит эту запись о визите.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Отмена</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeleteVisit(visit.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                  Удалить
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => { setEditingVisit(visit); setVisitDialogOpen(true); }}
+                              data-testid={`edit-visit-${visit.id}`}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" data-testid={`delete-visit-${visit.id}`}>
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Удалить визит?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Это навсегда удалит эту запись о визите.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteVisit(visit.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Удалить
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
@@ -383,18 +439,24 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
   const [date, setDate] = useState(visit?.date || dayjs().format('YYYY-MM-DD'));
   const [topic, setTopic] = useState(visit?.topic || '');
   const [notes, setNotes] = useState(visit?.notes || '');
+  const [price, setPrice] = useState(visit?.price ?? DEFAULT_PRICE);
+  const [tips, setTips] = useState(visit?.tips ?? 0);
   const [loading, setLoading] = useState(false);
+
+  const status = getPaymentStatus(price);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      const data = { date, topic, notes, price: parseInt(price) || 0, tips: parseInt(tips) || 0 };
+      
       if (visit) {
-        await visitsApi.update(visit.id, { date, topic, notes });
+        await visitsApi.update(visit.id, data);
         toast.success('Визит обновлён');
       } else {
-        await visitsApi.create(clientId, { date, topic, notes });
+        await visitsApi.create(clientId, data);
         toast.success('Визит добавлен');
       }
       onSuccess();
@@ -407,7 +469,7 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
   };
 
   return (
-    <DialogContent>
+    <DialogContent className="sm:max-w-lg">
       <form onSubmit={handleSubmit}>
         <DialogHeader>
           <DialogTitle>{visit ? 'Редактировать визит' : 'Добавить визит'}</DialogTitle>
@@ -416,28 +478,63 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="visit-date">Дата</Label>
-            <Input
-              id="visit-date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-              data-testid="visit-date-input"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="visit-date">Дата</Label>
+              <Input
+                id="visit-date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+                data-testid="visit-date-input"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="visit-topic">Тема</Label>
+              <Input
+                id="visit-topic"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="например: Стресс, Сон"
+                required
+                data-testid="visit-topic-input"
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="visit-topic">Тема</Label>
-            <Input
-              id="visit-topic"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="например: Стресс, Сон, Энергия"
-              required
-              data-testid="visit-topic-input"
-            />
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="visit-price">Оплата (₽)</Label>
+              <Input
+                id="visit-price"
+                type="number"
+                min="0"
+                step="100"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="15000"
+                data-testid="visit-price-input"
+              />
+              <p className="text-xs text-muted-foreground">
+                Статус: <Badge variant={status.variant} className="ml-1">{status.label}</Badge>
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="visit-tips">Чаевые (₽)</Label>
+              <Input
+                id="visit-tips"
+                type="number"
+                min="0"
+                step="100"
+                value={tips}
+                onChange={(e) => setTips(e.target.value)}
+                placeholder="0"
+                data-testid="visit-tips-input"
+              />
+            </div>
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="visit-notes">Заметки</Label>
             <Textarea
@@ -445,7 +542,7 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Заметки о сеансе..."
-              rows={4}
+              rows={3}
               data-testid="visit-notes-input"
             />
           </div>
