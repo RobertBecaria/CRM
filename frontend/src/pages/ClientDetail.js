@@ -478,6 +478,26 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
   const [tips, setTips] = useState(visit?.tips ?? 0);
   const [loading, setLoading] = useState(false);
 
+  // Update form when visit changes (for editing)
+  useEffect(() => {
+    if (visit) {
+      setDate(visit.date || dayjs().format('YYYY-MM-DD'));
+      setTopic(visit.topic || '');
+      setPractices(visit.practices || []);
+      setNotes(visit.notes || '');
+      setPrice(visit.price ?? DEFAULT_PRICE);
+      setTips(visit.tips ?? 0);
+    } else {
+      // Reset to defaults for new visit
+      setDate(dayjs().format('YYYY-MM-DD'));
+      setTopic('');
+      setPractices([]);
+      setNotes('');
+      setPrice(DEFAULT_PRICE);
+      setTips(0);
+    }
+  }, [visit]);
+
   const status = getPaymentStatus(price);
 
   const togglePractice = (practice) => {
