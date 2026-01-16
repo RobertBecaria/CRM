@@ -148,10 +148,10 @@ export default function Dashboard() {
       {/* Charts and Lists */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Visits Over Time Chart */}
-        <Card className="lg:col-span-8 card-shadow animate-fade-in-up">
+        <Card className="lg:col-span-4 card-shadow animate-fade-in-up">
           <CardHeader>
             <CardTitle className="text-lg">Визиты по времени</CardTitle>
-            <CardDescription>Активность за последние 12 месяцев</CardDescription>
+            <CardDescription>Активность за 12 месяцев</CardDescription>
           </CardHeader>
           <CardContent>
             {stats?.visits_over_time?.length > 0 ? (
@@ -159,7 +159,7 @@ export default function Dashboard() {
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={stats.visits_over_time} margin={{ left: 8, right: 16, top: 8, bottom: 8 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E6F0EE" />
-                    <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                    <XAxis dataKey="label" tick={{ fontSize: 10 }} />
                     <YAxis tick={{ fontSize: 12 }} />
                     <Tooltip />
                     <Line 
@@ -175,7 +175,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="h-64 flex items-center justify-center text-muted-foreground" data-testid="chart-empty">
-                Пока нет данных о визитах. Добавьте визиты для просмотра статистики.
+                Пока нет данных о визитах.
               </div>
             )}
           </CardContent>
