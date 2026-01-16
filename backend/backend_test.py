@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 
 class KinesioCRMTester:
-    def __init__(self, base_url="https://wellness-crm-3.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://healerdesk-2.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.token = None
         self.tests_run = 0
