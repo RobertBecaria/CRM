@@ -772,6 +772,396 @@ async def get_available_practices(current_user: dict = Depends(get_current_user)
     """Get list of available practices"""
     return {"practices": AVAILABLE_PRACTICES}
 
+# ==================== RETREAT ROUTES ====================
+
+DEFAULT_RETREAT_PRICE = 30000  # Default price per participant
+
+class RetreatParticipant(BaseModel):
+    client_id: str
+    payment: int = Field(default=DEFAULT_RETREAT_PRICE, ge=0)
+    payment_status: str = Field(default="not_paid")  # paid, partial, not_paid
+
+class RetreatExpense(BaseModel):
+    name: str = Field(..., min_length=1, max_length=200)
+    amount: int = Field(..., ge=0)
+
+class RetreatCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=200)
+    start_date: str  # ISO date string YYYY-MM-DD
+    end_date: str  # ISO date string YYYY-MM-DD
+
+class RetreatUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=200)
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+
+@api_router.get("/retreats")
+async def get_retreats(
+    page: int = 1,
+    page_size: int = 20,
+    year: Optional[int] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get all retreats with pagination"""
+    query = {}
+    if year:
+        query["start_date"] = {"$gte": f"{year}-01-01", "$lte": f"{year}-12-31"}
+    
+    total = await db.retreats.count_documents(query)
+    skip = (page - 1) * page_size
+    
+    cursor = db.retreats.find(query).sort("start_date", -1).skip(skip).limit(page_size)
+    retreats = await cursor.to_list(length=page_size)
+    
+    # Enrich with calculated totals
+    enriched_retreats = []
+    for retreat in retreats:
+        retreat_data = serialize_doc(retreat)
+        participants = retreat.get("participants", [])
+        expenses = retreat.get("expenses", [])
+        
+        retreat_data["total_participants"] = len(participants)
+        retreat_data["total_revenue"] = sum(p.get("payment", 0) for p in participants)
+        retreat_data["total_expenses"] = sum(e.get("amount", 0) for e in expenses)
+        retreat_data["net_profit"] = retreat_data["total_revenue"] - retreat_data["total_expenses"]
+        
+        enriched_retreats.append(retreat_data)
+    
+    return {
+        "retreats": enriched_retreats,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": (total + page_size - 1) // page_size
+    }
+
+@api_router.post("/retreats")
+async def create_retreat(
+    retreat_data: RetreatCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a new retreat"""
+    retreat_doc = {
+        "name": retreat_data.name,
+        "start_date": retreat_data.start_date,
+        "end_date": retreat_data.end_date,
+        "participants": [],
+        "expenses": [],
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    result = await db.retreats.insert_one(retreat_doc)
+    retreat_doc["_id"] = result.inserted_id
+    return serialize_doc(retreat_doc)
+
+@api_router.get("/retreats/{retreat_id}")
+async def get_retreat(
+    retreat_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get a single retreat with full details"""
+    try:
+        retreat = await db.retreats.find_one({"_id": ObjectId(retreat_id)})
+    except:
+        raise HTTPException(status_code=400, detail="Invalid retreat ID format")
+    
+    if not retreat:
+        raise HTTPException(status_code=404, detail="Retreat not found")
+    
+    retreat_data = serialize_doc(retreat)
+    
+    # Enrich participants with client names
+    enriched_participants = []
+    for p in retreat.get("participants", []):
+        try:
+            client = await db.clients.find_one({"_id": ObjectId(p["client_id"])})
+            participant_data = {
+                "client_id": p["client_id"],
+                "payment": p.get("payment", DEFAULT_RETREAT_PRICE),
+                "payment_status": p.get("payment_status", "not_paid"),
+                "client_name": format_client_name(client) if client else "Неизвестный клиент"
+            }
+            enriched_participants.append(participant_data)
+        except:
+            pass
+    
+    retreat_data["participants"] = enriched_participants
+    
+    # Calculate totals
+    retreat_data["total_participants"] = len(enriched_participants)
+    retreat_data["total_revenue"] = sum(p.get("payment", 0) for p in enriched_participants)
+    retreat_data["total_expenses"] = sum(e.get("amount", 0) for e in retreat.get("expenses", []))
+    retreat_data["net_profit"] = retreat_data["total_revenue"] - retreat_data["total_expenses"]
+    
+    return retreat_data
+
+@api_router.put("/retreats/{retreat_id}")
+async def update_retreat(
+    retreat_id: str,
+    retreat_data: RetreatUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update retreat basic info"""
+    try:
+        retreat = await db.retreats.find_one({"_id": ObjectId(retreat_id)})
+    except:
+        raise HTTPException(status_code=400, detail="Invalid retreat ID format")
+    
+    if not retreat:
+        raise HTTPException(status_code=404, detail="Retreat not found")
+    
+    update_data = {k: v for k, v in retreat_data.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc)
+    
+    await db.retreats.update_one(
+        {"_id": ObjectId(retreat_id)},
+        {"$set": update_data}
+    )
+    
+    updated_retreat = await db.retreats.find_one({"_id": ObjectId(retreat_id)})
+    return serialize_doc(updated_retreat)
+
+@api_router.delete("/retreats/{retreat_id}")
+async def delete_retreat(
+    retreat_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete a retreat and associated visits"""
+    try:
+        retreat = await db.retreats.find_one({"_id": ObjectId(retreat_id)})
+    except:
+        raise HTTPException(status_code=400, detail="Invalid retreat ID format")
+    
+    if not retreat:
+        raise HTTPException(status_code=404, detail="Retreat not found")
+    
+    # Delete associated visits
+    await db.visits.delete_many({"retreat_id": retreat_id})
+    
+    # Delete the retreat
+    await db.retreats.delete_one({"_id": ObjectId(retreat_id)})
+    
+    return {"message": "Retreat deleted successfully"}
+
+@api_router.post("/retreats/{retreat_id}/participants")
+async def add_retreat_participant(
+    retreat_id: str,
+    participant: RetreatParticipant,
+    current_user: dict = Depends(get_current_user)
+):
+    """Add a participant to retreat and create a visit record"""
+    try:
+        retreat = await db.retreats.find_one({"_id": ObjectId(retreat_id)})
+    except:
+        raise HTTPException(status_code=400, detail="Invalid retreat ID format")
+    
+    if not retreat:
+        raise HTTPException(status_code=404, detail="Retreat not found")
+    
+    # Verify client exists
+    try:
+        client = await db.clients.find_one({"_id": ObjectId(participant.client_id)})
+    except:
+        raise HTTPException(status_code=400, detail="Invalid client ID format")
+    
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    # Check if already a participant
+    existing = [p for p in retreat.get("participants", []) if p["client_id"] == participant.client_id]
+    if existing:
+        raise HTTPException(status_code=400, detail="Client is already a participant")
+    
+    # Add participant
+    participant_doc = {
+        "client_id": participant.client_id,
+        "payment": participant.payment,
+        "payment_status": participant.payment_status
+    }
+    
+    await db.retreats.update_one(
+        {"_id": ObjectId(retreat_id)},
+        {
+            "$push": {"participants": participant_doc},
+            "$set": {"updated_at": datetime.now(timezone.utc)}
+        }
+    )
+    
+    # Create a visit record for this participant
+    visit_doc = {
+        "client_id": participant.client_id,
+        "date": retreat["start_date"],
+        "topic": f"Ретрит: {retreat['name']}",
+        "practices": [],
+        "notes": f"Дыхательный ретрит {retreat['start_date']} - {retreat['end_date']}",
+        "price": participant.payment,
+        "tips": 0,
+        "retreat_id": retreat_id,
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    await db.visits.insert_one(visit_doc)
+    
+    return {"message": "Participant added successfully"}
+
+@api_router.put("/retreats/{retreat_id}/participants/{client_id}")
+async def update_retreat_participant(
+    retreat_id: str,
+    client_id: str,
+    participant: RetreatParticipant,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update participant payment info"""
+    try:
+        retreat = await db.retreats.find_one({"_id": ObjectId(retreat_id)})
+    except:
+        raise HTTPException(status_code=400, detail="Invalid retreat ID format")
+    
+    if not retreat:
+        raise HTTPException(status_code=404, detail="Retreat not found")
+    
+    # Update participant in array
+    await db.retreats.update_one(
+        {"_id": ObjectId(retreat_id), "participants.client_id": client_id},
+        {
+            "$set": {
+                "participants.$.payment": participant.payment,
+                "participants.$.payment_status": participant.payment_status,
+                "updated_at": datetime.now(timezone.utc)
+            }
+        }
+    )
+    
+    # Update the visit record too
+    await db.visits.update_one(
+        {"retreat_id": retreat_id, "client_id": client_id},
+        {"$set": {"price": participant.payment, "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    return {"message": "Participant updated successfully"}
+
+@api_router.delete("/retreats/{retreat_id}/participants/{client_id}")
+async def remove_retreat_participant(
+    retreat_id: str,
+    client_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Remove a participant from retreat"""
+    try:
+        retreat = await db.retreats.find_one({"_id": ObjectId(retreat_id)})
+    except:
+        raise HTTPException(status_code=400, detail="Invalid retreat ID format")
+    
+    if not retreat:
+        raise HTTPException(status_code=404, detail="Retreat not found")
+    
+    await db.retreats.update_one(
+        {"_id": ObjectId(retreat_id)},
+        {
+            "$pull": {"participants": {"client_id": client_id}},
+            "$set": {"updated_at": datetime.now(timezone.utc)}
+        }
+    )
+    
+    # Remove the visit record
+    await db.visits.delete_one({"retreat_id": retreat_id, "client_id": client_id})
+    
+    return {"message": "Participant removed successfully"}
+
+@api_router.post("/retreats/{retreat_id}/expenses")
+async def add_retreat_expense(
+    retreat_id: str,
+    expense: RetreatExpense,
+    current_user: dict = Depends(get_current_user)
+):
+    """Add an expense to retreat"""
+    try:
+        retreat = await db.retreats.find_one({"_id": ObjectId(retreat_id)})
+    except:
+        raise HTTPException(status_code=400, detail="Invalid retreat ID format")
+    
+    if not retreat:
+        raise HTTPException(status_code=404, detail="Retreat not found")
+    
+    expense_doc = {
+        "id": str(ObjectId()),
+        "name": expense.name,
+        "amount": expense.amount
+    }
+    
+    await db.retreats.update_one(
+        {"_id": ObjectId(retreat_id)},
+        {
+            "$push": {"expenses": expense_doc},
+            "$set": {"updated_at": datetime.now(timezone.utc)}
+        }
+    )
+    
+    return {"message": "Expense added successfully", "expense": expense_doc}
+
+@api_router.delete("/retreats/{retreat_id}/expenses/{expense_id}")
+async def remove_retreat_expense(
+    retreat_id: str,
+    expense_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Remove an expense from retreat"""
+    try:
+        retreat = await db.retreats.find_one({"_id": ObjectId(retreat_id)})
+    except:
+        raise HTTPException(status_code=400, detail="Invalid retreat ID format")
+    
+    if not retreat:
+        raise HTTPException(status_code=404, detail="Retreat not found")
+    
+    await db.retreats.update_one(
+        {"_id": ObjectId(retreat_id)},
+        {
+            "$pull": {"expenses": {"id": expense_id}},
+            "$set": {"updated_at": datetime.now(timezone.utc)}
+        }
+    )
+    
+    return {"message": "Expense removed successfully"}
+
+@api_router.get("/stats/retreats")
+async def get_retreat_stats(
+    year: Optional[int] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get retreat statistics"""
+    now = datetime.now(timezone.utc)
+    target_year = year or now.year
+    
+    query = {"start_date": {"$gte": f"{target_year}-01-01", "$lte": f"{target_year}-12-31"}}
+    
+    retreats = await db.retreats.find(query).to_list(length=100)
+    
+    total_retreats = len(retreats)
+    total_participants = 0
+    total_revenue = 0
+    total_expenses = 0
+    
+    for retreat in retreats:
+        participants = retreat.get("participants", [])
+        expenses = retreat.get("expenses", [])
+        
+        total_participants += len(participants)
+        total_revenue += sum(p.get("payment", 0) for p in participants)
+        total_expenses += sum(e.get("amount", 0) for e in expenses)
+    
+    avg_participants = total_participants / total_retreats if total_retreats > 0 else 0
+    
+    return {
+        "year": target_year,
+        "total_retreats": total_retreats,
+        "total_participants": total_participants,
+        "avg_participants": round(avg_participants, 1),
+        "total_revenue": total_revenue,
+        "total_expenses": total_expenses,
+        "net_profit": total_revenue - total_expenses
+    }
+
 # Health check
 @api_router.get("/health")
 async def health_check():
