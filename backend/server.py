@@ -147,7 +147,7 @@ class ClientUpdate(BaseModel):
 
 # Visit Models
 DEFAULT_PRICE = 15000  # Default price in rubles
-AVAILABLE_PRACTICES = ["Коррекция", "ТСЯ", "Лепило"]  # Available practices
+AVAILABLE_PRACTICES = ["Коррекция", "ТСЯ", "Лепило", "Ребефинг"]  # Available practices
 
 class VisitCreate(BaseModel):
     date: str  # ISO date string YYYY-MM-DD
