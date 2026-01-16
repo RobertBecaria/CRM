@@ -136,12 +136,14 @@ class ClientCreate(BaseModel):
     middle_name: Optional[str] = Field(None, max_length=100)  # Отчество
     last_name: str = Field(..., min_length=1, max_length=100)
     dob: str  # ISO date string YYYY-MM-DD
+    phone: Optional[str] = Field(None, max_length=20)  # Phone number
 
 class ClientUpdate(BaseModel):
     first_name: Optional[str] = Field(None, min_length=1, max_length=100)
     middle_name: Optional[str] = Field(None, max_length=100)
     last_name: Optional[str] = Field(None, min_length=1, max_length=100)
     dob: Optional[str] = None
+    phone: Optional[str] = Field(None, max_length=20)
 
 # Visit Models
 DEFAULT_PRICE = 15000  # Default price in rubles
