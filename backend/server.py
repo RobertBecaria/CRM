@@ -243,6 +243,7 @@ async def create_client(
 ):
     client_doc = {
         "first_name": client_data.first_name,
+        "middle_name": client_data.middle_name or "",
         "last_name": client_data.last_name,
         "dob": client_data.dob,
         "created_at": datetime.now(timezone.utc),
