@@ -700,6 +700,9 @@ async def get_yearly_summary(
     
     # Overall stats
     total_visits = sum(c["visit_count"] for c in client_summaries)
+    total_revenue = sum(c["total_revenue"] for c in client_summaries)
+    total_tips = sum(c["total_tips"] for c in client_summaries)
+    avg_check = total_revenue / total_visits if total_visits > 0 else 0
     
     # All topics for year
     pipeline = [
@@ -714,6 +717,9 @@ async def get_yearly_summary(
         "year": year,
         "total_clients_active": len(client_summaries),
         "total_visits": total_visits,
+        "total_revenue": total_revenue,
+        "total_tips": total_tips,
+        "avg_check": round(avg_check),
         "client_summaries": client_summaries,
         "topic_distribution": [{"topic": t["_id"], "count": t["count"]} for t in all_topics]
     }
