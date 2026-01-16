@@ -14,6 +14,13 @@ import 'dayjs/locale/ru';
 
 dayjs.locale('ru');
 
+// Helper to format full name
+function formatClientName(client) {
+  const parts = [client.last_name, client.first_name];
+  if (client.middle_name) parts.push(client.middle_name);
+  return parts.join(' ');
+}
+
 export default function ClientList() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
