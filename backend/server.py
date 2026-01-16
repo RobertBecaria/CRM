@@ -767,6 +767,11 @@ async def get_all_topics(current_user: dict = Depends(get_current_user)):
     topics = await topics_cursor.to_list(length=500)
     return {"topics": [t["_id"] for t in topics if t["_id"]]}
 
+@api_router.get("/practices")
+async def get_available_practices(current_user: dict = Depends(get_current_user)):
+    """Get list of available practices"""
+    return {"practices": AVAILABLE_PRACTICES}
+
 # Health check
 @api_router.get("/health")
 async def health_check():
