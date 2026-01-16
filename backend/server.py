@@ -506,7 +506,50 @@ async def get_stats_overview(
         "visits_last_30": visits_last_30,
         "top_topics": top_topics,
         "recent_visits": enriched_visits,
-        "visits_over_time": visits_over_time
+        "visits_over_time": visits_over_time,
+        "financial": await get_financial_stats_ytd()
+    }
+
+async def get_financial_stats_ytd():
+    """Get financial statistics for current year"""
+    now = datetime.now(timezone.utc)
+    year_start = f"{now.year}-01-01"
+    thirty_days_ago = (now - timedelta(days=30)).strftime("%Y-%m-%d")
+    
+    # Revenue YTD
+    pipeline_ytd = [
+        {"$match": {"date": {"$gte": year_start}}},
+        {"$group": {
+            "_id": None,
+            "total_revenue": {"$sum": {"$ifNull": ["$price", 15000]}},
+            "total_tips": {"$sum": {"$ifNull": ["$tips", 0]}},
+            "count": {"$sum": 1}
+        }}
+    ]
+    result_ytd = await db.visits.aggregate(pipeline_ytd).to_list(1)
+    ytd_data = result_ytd[0] if result_ytd else {"total_revenue": 0, "total_tips": 0, "count": 0}
+    
+    # Revenue last 30 days
+    pipeline_30 = [
+        {"$match": {"date": {"$gte": thirty_days_ago}}},
+        {"$group": {
+            "_id": None,
+            "total_revenue": {"$sum": {"$ifNull": ["$price", 15000]}},
+            "total_tips": {"$sum": {"$ifNull": ["$tips", 0]}},
+            "count": {"$sum": 1}
+        }}
+    ]
+    result_30 = await db.visits.aggregate(pipeline_30).to_list(1)
+    last_30_data = result_30[0] if result_30 else {"total_revenue": 0, "total_tips": 0, "count": 0}
+    
+    avg_check_ytd = ytd_data["total_revenue"] / ytd_data["count"] if ytd_data["count"] > 0 else 0
+    
+    return {
+        "revenue_ytd": ytd_data["total_revenue"],
+        "tips_ytd": ytd_data["total_tips"],
+        "revenue_last_30": last_30_data["total_revenue"],
+        "tips_last_30": last_30_data["total_tips"],
+        "avg_check": round(avg_check_ytd)
     }
 
 @api_router.get("/stats/client/{client_id}")
