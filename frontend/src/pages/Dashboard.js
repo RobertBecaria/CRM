@@ -256,6 +256,49 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Retreats Statistics */}
+        {retreatStats && (
+          <Card className="lg:col-span-12 card-shadow animate-fade-in-up stagger-4">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Mountain className="w-5 h-5 text-[hsl(var(--primary))]" />
+                  Ретриты за год
+                </CardTitle>
+                <CardDescription>Групповые дыхательные практики</CardDescription>
+              </div>
+              <Link to="/retreats">
+                <Button variant="ghost" size="sm" data-testid="view-retreats-button">
+                  Все ретриты
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="retreat-stats">
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <p className="text-2xl font-bold text-[hsl(var(--primary))]">{retreatStats.total_retreats}</p>
+                  <p className="text-sm text-muted-foreground">Ретритов</p>
+                </div>
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <p className="text-2xl font-bold">{retreatStats.total_participants}</p>
+                  <p className="text-sm text-muted-foreground">Участников</p>
+                </div>
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <p className="text-2xl font-bold text-green-600">{formatCurrency(retreatStats.total_revenue)}</p>
+                  <p className="text-sm text-muted-foreground">Доход</p>
+                </div>
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <p className={`text-2xl font-bold ${retreatStats.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatCurrency(retreatStats.net_profit)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Прибыль</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Recent Visits */}
         <Card className="lg:col-span-12 card-shadow animate-fade-in-up stagger-3">
           <CardHeader className="flex flex-row items-center justify-between">
