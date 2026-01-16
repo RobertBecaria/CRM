@@ -166,22 +166,40 @@ export default function ClientForm() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="dob">Дата рождения</Label>
-                <Input
-                  id="dob"
-                  type="date"
-                  value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                  required
-                  max={dayjs().format('YYYY-MM-DD')}
-                  data-testid="client-dob-input"
-                />
-                {dob && (
-                  <p className="text-sm text-muted-foreground">
-                    Возраст: {dayjs().diff(dayjs(dob), 'year')} {getYearWord(dayjs().diff(dayjs(dob), 'year'))}
-                  </p>
-                )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="dob">Дата рождения</Label>
+                  <Input
+                    id="dob"
+                    type="date"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
+                    required
+                    max={dayjs().format('YYYY-MM-DD')}
+                    data-testid="client-dob-input"
+                  />
+                  {dob && (
+                    <p className="text-sm text-muted-foreground">
+                      Возраст: {dayjs().diff(dayjs(dob), 'year')} {getYearWord(dayjs().diff(dayjs(dob), 'year'))}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Телефон</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+7 (999) 123-45-67"
+                      maxLength={20}
+                      className="pl-10"
+                      data-testid="client-phone-input"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="flex gap-4 pt-4">
