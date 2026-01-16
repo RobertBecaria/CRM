@@ -31,6 +31,14 @@ function formatCurrency(amount) {
   return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(amount);
 }
 
+// Helper to format full name
+function formatClientName(client) {
+  if (!client) return '';
+  const parts = [client.last_name, client.first_name];
+  if (client.middle_name) parts.push(client.middle_name);
+  return parts.join(' ');
+}
+
 export default function ClientDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
