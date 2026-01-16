@@ -70,6 +70,14 @@ def serialize_doc(doc):
         return result
     return doc
 
+def format_client_name(client):
+    """Format client name with optional middle name"""
+    parts = [client.get('first_name', '')]
+    if client.get('middle_name'):
+        parts.append(client['middle_name'])
+    parts.append(client.get('last_name', ''))
+    return ' '.join(parts)
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
