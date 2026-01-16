@@ -18,6 +18,7 @@ export default function ClientForm() {
   const isEditing = Boolean(id);
 
   const [firstName, setFirstName] = useState('');
+  const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [dob, setDob] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,6 +35,7 @@ export default function ClientForm() {
       const response = await clientsApi.getOne(id);
       const client = response.data;
       setFirstName(client.first_name);
+      setMiddleName(client.middle_name || '');
       setLastName(client.last_name);
       setDob(client.dob);
     } catch (err) {
@@ -51,6 +53,7 @@ export default function ClientForm() {
     try {
       const data = {
         first_name: firstName.trim(),
+        middle_name: middleName.trim() || null,
         last_name: lastName.trim(),
         dob,
       };
@@ -122,7 +125,19 @@ export default function ClientForm() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6" data-testid="client-form">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Фамилия</Label>
+                  <Input
+                    id="lastName"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Иванова"
+                    required
+                    maxLength={100}
+                    data-testid="client-last-name-input"
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="firstName">Имя</Label>
                   <Input
@@ -136,15 +151,14 @@ export default function ClientForm() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Фамилия</Label>
+                  <Label htmlFor="middleName">Отчество</Label>
                   <Input
-                    id="lastName"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Иванова"
-                    required
+                    id="middleName"
+                    value={middleName}
+                    onChange={(e) => setMiddleName(e.target.value)}
+                    placeholder="Сергеевна"
                     maxLength={100}
-                    data-testid="client-last-name-input"
+                    data-testid="client-middle-name-input"
                   />
                 </div>
               </div>
