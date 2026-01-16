@@ -175,7 +175,7 @@ export default function ClientDetail() {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Удалить клиента?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Это навсегда удалит <strong>{client?.first_name} {client?.last_name}</strong> и все записи о визитах.
+                        Это навсегда удалит <strong>{formatClientName(client)}</strong> и все записи о визитах.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -193,7 +193,7 @@ export default function ClientDetail() {
               </div>
             </div>
             <CardTitle className="text-2xl mt-4" data-testid="client-name">
-              {client?.first_name} {client?.last_name}
+              {formatClientName(client)}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
