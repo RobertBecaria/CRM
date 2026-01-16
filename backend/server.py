@@ -775,6 +775,84 @@ async def get_available_practices(current_user: dict = Depends(get_current_user)
     """Get list of available practices"""
     return {"practices": AVAILABLE_PRACTICES}
 
+# ==================== CALENDAR ROUTES ====================
+
+@api_router.get("/calendar/events")
+async def get_calendar_events(
+    start_date: str,
+    end_date: str,
+    event_type: Optional[str] = None,  # visits, retreats, or all
+    client_id: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get all events (visits and retreats) for calendar view"""
+    events = []
+    
+    # Get visits
+    if event_type in [None, "all", "visits"]:
+        visit_query = {
+            "date": {"$gte": start_date, "$lte": end_date}
+        }
+        if client_id:
+            visit_query["client_id"] = client_id
+        
+        visits_cursor = db.visits.find(visit_query).sort("date", 1)
+        visits = await visits_cursor.to_list(length=500)
+        
+        for visit in visits:
+            # Get client name
+            try:
+                client = await db.clients.find_one({"_id": ObjectId(visit["client_id"])})
+                client_name = format_client_name(client) if client else "Неизвестный"
+            except:
+                client_name = "Неизвестный"
+            
+            price = visit.get("price", DEFAULT_PRICE)
+            events.append({
+                "id": str(visit["_id"]),
+                "type": "visit",
+                "date": visit["date"],
+                "end_date": visit["date"],
+                "title": visit.get("topic", "Визит"),
+                "client_id": visit["client_id"],
+                "client_name": client_name,
+                "practices": visit.get("practices", []),
+                "price": price,
+                "tips": visit.get("tips", 0),
+                "notes": visit.get("notes", ""),
+                "retreat_id": visit.get("retreat_id"),
+                "payment_status": "charity" if price == 0 else ("discount" if price < DEFAULT_PRICE else "regular")
+            })
+    
+    # Get retreats
+    if event_type in [None, "all", "retreats"]:
+        retreat_query = {
+            "$or": [
+                {"start_date": {"$gte": start_date, "$lte": end_date}},
+                {"end_date": {"$gte": start_date, "$lte": end_date}},
+                {"$and": [{"start_date": {"$lte": start_date}}, {"end_date": {"$gte": end_date}}]}
+            ]
+        }
+        
+        retreats_cursor = db.retreats.find(retreat_query).sort("start_date", 1)
+        retreats = await retreats_cursor.to_list(length=100)
+        
+        for retreat in retreats:
+            participants = retreat.get("participants", [])
+            total_revenue = sum(p.get("payment", 0) for p in participants)
+            
+            events.append({
+                "id": str(retreat["_id"]),
+                "type": "retreat",
+                "date": retreat["start_date"],
+                "end_date": retreat["end_date"],
+                "title": retreat["name"],
+                "participant_count": len(participants),
+                "total_revenue": total_revenue
+            })
+    
+    return {"events": events}
+
 # ==================== RETREAT ROUTES ====================
 
 DEFAULT_RETREAT_PRICE = 30000  # Default price per participant
