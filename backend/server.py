@@ -522,8 +522,25 @@ async def get_stats_overview(
         "top_topics": top_topics,
         "recent_visits": enriched_visits,
         "visits_over_time": visits_over_time,
-        "financial": await get_financial_stats_ytd()
+        "financial": await get_financial_stats_ytd(),
+        "practices": await get_practice_stats_ytd()
     }
+
+async def get_practice_stats_ytd():
+    """Get practice statistics for current year"""
+    now = datetime.now(timezone.utc)
+    year_start = f"{now.year}-01-01"
+    
+    # Count practices YTD
+    pipeline = [
+        {"$match": {"date": {"$gte": year_start}}},
+        {"$unwind": {"path": "$practices", "preserveNullAndEmptyArrays": False}},
+        {"$group": {"_id": "$practices", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    result = await db.visits.aggregate(pipeline).to_list(10)
+    
+    return [{"practice": p["_id"], "count": p["count"]} for p in result]
 
 async def get_financial_stats_ytd():
     """Get financial statistics for current year"""
