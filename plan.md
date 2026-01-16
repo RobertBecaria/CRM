@@ -93,18 +93,44 @@
 9. ✅ Polished UI/UX using shadcn/ui; responsive styles; loading/empty/error states; data-testid attributes
 10. ✅ Testing: ran testing_agent_v3 for end-to-end flows, all issues addressed
 
+## Phase 3: Russian Translation & Financial Tracking ✅ COMPLETE
+
+### Completed Features:
+1. ✅ **Full Russian Translation** — All UI elements translated to Russian
+2. ✅ **Financial Tracking** — Added price & tips fields for visits
+   - Default price: 15,000 rubles (editable)
+   - Automatic status: "Благотворительность" (0₽), "Скидка" (<15K), "Обычный" (≥15K)
+   - Financial KPIs on Dashboard (revenue, tips, average check)
+3. ✅ **Middle Name Field** — Added отчество support for clients
+4. ✅ **Admin Credentials Updated** — New login: asliya@yandex.ru
+
+## Phase 4: Practices Tracking ✅ COMPLETE
+
+### Completed Features:
+1. ✅ **Practices Selection** — Toggle buttons for selecting practices during visit creation
+   - Available practices: "Коррекция", "ТСЯ", "Лепило"
+   - Multiple practices can be selected per visit
+2. ✅ **Practices Statistics** — New card on Dashboard showing practice usage stats
+   - Shows count per practice for current year
+   - Total practices applied
+3. ✅ **Practices Display** — Practices shown as badges on visit cards
+4. ✅ **Backend API** — `/api/practices` endpoint returns available practices
+5. ✅ **Statistics Integration** — Practice stats included in `/api/stats/overview`
+
 ## 3) Current Status
-**Phase 2 is COMPLETE.** The CRM is fully functional with:
+**Phase 4 is COMPLETE.** The CRM is fully functional with:
 - Authentication system (single admin)
-- Dashboard with KPIs and charts
-- Full client management (CRUD + search)
-- Full visit tracking (CRUD + filtering)
+- Dashboard with KPIs, charts, and practice statistics
+- Full client management (CRUD + search + middle name)
+- Full visit tracking (CRUD + filtering + price/tips + practices)
+- Financial tracking (revenue, tips, status, average check)
+- Practice tracking ("Коррекция", "ТСЯ", "Лепило")
 - Statistics with year-end summaries
-- Beautiful, responsive UI with calming wellness theme
+- Beautiful, responsive UI in Russian with calming wellness theme
 
 ### Admin Credentials
-- Email: admin@kinesioCRM.com
-- Password: password123
+- Email: asliya@yandex.ru
+- Password: X13resto1
 
 ## 4) Success Criteria ✅ All Met
 - ✅ All endpoints functional behind JWT; frontend matches backend; no hardcoded URLs
