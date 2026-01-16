@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { statsApi } from '../lib/api';
+import { statsApi, retreatsApi } from '../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Skeleton } from '../components/ui/skeleton';
 import { Badge } from '../components/ui/badge';
-import { Users, Calendar, TrendingUp, Activity, Plus, ArrowRight, Banknote, Gift, Wallet, Sparkles } from 'lucide-react';
+import { Users, Calendar, TrendingUp, Activity, Plus, ArrowRight, Banknote, Gift, Wallet, Sparkles, Mountain } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
@@ -19,6 +19,7 @@ function formatCurrency(amount) {
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
+  const [retreatStats, setRetreatStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -29,8 +30,12 @@ export default function Dashboard() {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await statsApi.getOverview();
-      setStats(response.data);
+      const [overviewRes, retreatsRes] = await Promise.all([
+        statsApi.getOverview(),
+        retreatsApi.getStats()
+      ]);
+      setStats(overviewRes.data);
+      setRetreatStats(retreatsRes.data);
     } catch (err) {
       setError('Не удалось загрузить данные');
       console.error(err);
