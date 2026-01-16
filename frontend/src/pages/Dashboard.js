@@ -57,6 +57,7 @@ export default function Dashboard() {
   }
 
   const financial = stats?.financial || {};
+  const practices = stats?.practices || [];
 
   return (
     <div className="container-responsive py-8">
