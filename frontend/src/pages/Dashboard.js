@@ -117,8 +117,9 @@ export default function Dashboard() {
       {/* Financial KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
         <FinancialCard
-          title="Доход за год"
-          value={formatCurrency(financial.revenue_ytd || 0)}
+          title="Общий доход"
+          value={formatCurrency((financial.revenue_ytd || 0) + (financial.tips_ytd || 0))}
+          subtitle={`Визиты: ${formatCurrency(financial.visits_revenue_ytd || 0)} + Ретриты: ${formatCurrency(financial.retreat_revenue_ytd || 0)} + Чаевые: ${formatCurrency(financial.tips_ytd || 0)}`}
           icon={Banknote}
           color="primary"
           delay="stagger-1"
@@ -126,7 +127,7 @@ export default function Dashboard() {
         />
         <FinancialCard
           title="Доход за 30 дней"
-          value={formatCurrency(financial.revenue_last_30 || 0)}
+          value={formatCurrency((financial.revenue_last_30 || 0) + (financial.tips_last_30 || 0))}
           icon={Wallet}
           color="chart-2"
           delay="stagger-2"
