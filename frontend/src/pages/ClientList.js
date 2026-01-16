@@ -161,7 +161,7 @@ export default function ClientList() {
               <Table data-testid="clients-table">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Имя</TableHead>
+                    <TableHead>ФИО</TableHead>
                     <TableHead>Дата рождения</TableHead>
                     <TableHead>Возраст</TableHead>
                     <TableHead className="text-right">Действия</TableHead>
@@ -176,7 +176,7 @@ export default function ClientList() {
                       data-testid={`client-row-${client.id}`}
                     >
                       <TableCell className="font-medium">
-                        {client.first_name} {client.last_name}
+                        {formatClientName(client)}
                       </TableCell>
                       <TableCell>
                         {dayjs(client.dob).format('D MMMM YYYY')}
@@ -192,7 +192,7 @@ export default function ClientList() {
                             </Button>
                           </Link>
                           <DeleteClientDialog
-                            clientName={`${client.first_name} ${client.last_name}`}
+                            clientName={formatClientName(client)}
                             onConfirm={() => handleDelete(client.id)}
                             clientId={client.id}
                           />
