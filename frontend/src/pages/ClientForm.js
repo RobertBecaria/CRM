@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
@@ -21,6 +21,7 @@ export default function ClientForm() {
   const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [dob, setDob] = useState('');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(isEditing);
 
@@ -38,6 +39,7 @@ export default function ClientForm() {
       setMiddleName(client.middle_name || '');
       setLastName(client.last_name);
       setDob(client.dob);
+      setPhone(client.phone || '');
     } catch (err) {
       toast.error('Не удалось загрузить клиента');
       navigate('/clients');
@@ -56,6 +58,7 @@ export default function ClientForm() {
         middle_name: middleName.trim() || null,
         last_name: lastName.trim(),
         dob,
+        phone: phone.trim() || null,
       };
 
       if (isEditing) {
