@@ -18,7 +18,7 @@ import 'dayjs/locale/ru';
 dayjs.locale('ru');
 
 const DEFAULT_PRICE = 15000;
-const AVAILABLE_PRACTICES = ['Коррекция', 'ТСЯ', 'Лепило'];
+const AVAILABLE_PRACTICES = ['Коррекция', 'ТСЯ', 'Лепило', 'Ребефинг'];
 
 // Helper function to get payment status
 function getPaymentStatus(price) {
