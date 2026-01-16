@@ -233,21 +233,10 @@ function CreateRetreatDialog({ onClose, onSuccess }) {
         <DialogHeader>
           <DialogTitle>Создать ретрит</DialogTitle>
           <DialogDescription>
-            Укажите название и даты проведения ретрита
+            Выберите даты проведения ретрита
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="retreat-name">Название</Label>
-            <Input
-              id="retreat-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Дыхательный ретрит — Январь 2026"
-              required
-              data-testid="retreat-name-input"
-            />
-          </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="start-date">Дата начала</Label>
@@ -271,6 +260,10 @@ function CreateRetreatDialog({ onClose, onSuccess }) {
                 data-testid="retreat-end-date"
               />
             </div>
+          </div>
+          <div className="p-3 bg-muted/50 rounded-lg">
+            <p className="text-sm text-muted-foreground">Название ретрита:</p>
+            <p className="font-medium" data-testid="retreat-name-preview">{generateRetreatName()}</p>
           </div>
         </div>
         <DialogFooter>
