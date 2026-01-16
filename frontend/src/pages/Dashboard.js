@@ -213,6 +213,44 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Practices Statistics */}
+        <Card className="lg:col-span-4 card-shadow animate-fade-in-up stagger-3">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[hsl(var(--primary))]" />
+              Практики за год
+            </CardTitle>
+            <CardDescription>Статистика применяемых практик</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {practices.length > 0 ? (
+              <div className="space-y-3" data-testid="practices-stats-list">
+                {practices.map((p) => (
+                  <div key={p.practice} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">{p.practice}</span>
+                    </div>
+                    <Badge variant="outline" className="bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]">
+                      {p.count}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-muted-foreground text-sm">
+                Практики ещё не записаны
+              </div>
+            )}
+            {practices.length > 0 && (
+              <div className="mt-4 pt-4 border-t">
+                <p className="text-sm text-muted-foreground">
+                  Всего применено практик: <span className="font-medium text-foreground">{practices.reduce((sum, p) => sum + p.count, 0)}</span>
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Recent Visits */}
         <Card className="lg:col-span-12 card-shadow animate-fade-in-up stagger-3">
           <CardHeader className="flex flex-row items-center justify-between">
