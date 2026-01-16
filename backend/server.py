@@ -656,15 +656,26 @@ async def get_yearly_summary(
     for client in clients:
         client_id = str(client["_id"])
         
-        # Visit count for year
-        visit_count = await db.visits.count_documents({
-            "client_id": client_id,
-            "date": {"$gte": date_from, "$lte": date_to}
-        })
+        # Get visits with financial data for year
+        pipeline = [
+            {"$match": {
+                "client_id": client_id,
+                "date": {"$gte": date_from, "$lte": date_to}
+            }},
+            {"$group": {
+                "_id": None,
+                "visit_count": {"$sum": 1},
+                "total_revenue": {"$sum": {"$ifNull": ["$price", 15000]}},
+                "total_tips": {"$sum": {"$ifNull": ["$tips", 0]}}
+            }}
+        ]
+        result = await db.visits.aggregate(pipeline).to_list(1)
         
-        if visit_count > 0:
+        if result and result[0]["visit_count"] > 0:
+            visit_data = result[0]
+            
             # Topics for this client this year
-            pipeline = [
+            topics_pipeline = [
                 {"$match": {
                     "client_id": client_id,
                     "date": {"$gte": date_from, "$lte": date_to}
@@ -672,13 +683,15 @@ async def get_yearly_summary(
                 {"$group": {"_id": "$topic", "count": {"$sum": 1}}},
                 {"$sort": {"count": -1}}
             ]
-            topics_cursor = db.visits.aggregate(pipeline)
+            topics_cursor = db.visits.aggregate(topics_pipeline)
             topics = await topics_cursor.to_list(length=100)
             
             client_summaries.append({
                 "client_id": client_id,
                 "client_name": f"{client['first_name']} {client['last_name']}",
-                "visit_count": visit_count,
+                "visit_count": visit_data["visit_count"],
+                "total_revenue": visit_data["total_revenue"],
+                "total_tips": visit_data["total_tips"],
                 "topics": [{"topic": t["_id"], "count": t["count"]} for t in topics]
             })
     
