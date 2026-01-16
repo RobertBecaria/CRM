@@ -117,14 +117,53 @@
 4. ✅ **Backend API** — `/api/practices` endpoint returns available practices
 5. ✅ **Statistics Integration** — Practice stats included in `/api/stats/overview`
 
+## Phase 5: Retreats Management ✅ COMPLETE
+
+### Completed Features:
+1. ✅ **Retreats Section** — New navigation item between "Клиенты" and "Статистика"
+2. ✅ **Retreat CRUD** — Create, view, delete retreats
+   - Retreat name, start date, end date
+3. ✅ **Participants Management** — Add/remove clients to retreats
+   - Select from existing clients
+   - Default price: 30,000 rubles (editable)
+   - Payment status: Оплачено / Частично / Не оплачено
+4. ✅ **Expenses Tracking** — Add/remove expenses for each retreat
+   - Name and amount for each expense
+   - Total expenses calculation
+5. ✅ **Financial Summary** — Per-retreat and overall statistics
+   - Total revenue (sum of participant payments)
+   - Total expenses
+   - Net profit (revenue - expenses)
+6. ✅ **Visit Auto-creation** — When adding participant, visit record auto-created
+   - Topic: "Ретрит: [Retreat Name]"
+   - Date: Retreat start date
+   - Links retreat and client visit history
+7. ✅ **Dashboard Integration** — Retreat statistics displayed on main dashboard
+   - Total retreats, participants, revenue, profit
+8. ✅ **Retreat Statistics API** — `/api/stats/retreats` endpoint
+
+### Backend Endpoints:
+- `GET /api/retreats` — List all retreats with pagination
+- `POST /api/retreats` — Create retreat
+- `GET /api/retreats/{id}` — Get retreat details with participants & expenses
+- `PUT /api/retreats/{id}` — Update retreat info
+- `DELETE /api/retreats/{id}` — Delete retreat and associated visits
+- `POST /api/retreats/{id}/participants` — Add participant
+- `PUT /api/retreats/{id}/participants/{client_id}` — Update participant payment
+- `DELETE /api/retreats/{id}/participants/{client_id}` — Remove participant
+- `POST /api/retreats/{id}/expenses` — Add expense
+- `DELETE /api/retreats/{id}/expenses/{expense_id}` — Remove expense
+- `GET /api/stats/retreats` — Get retreat statistics
+
 ## 3) Current Status
-**Phase 4 is COMPLETE.** The CRM is fully functional with:
+**Phase 5 is COMPLETE.** The CRM is fully functional with:
 - Authentication system (single admin)
-- Dashboard with KPIs, charts, and practice statistics
+- Dashboard with KPIs, charts, practice & retreat statistics
 - Full client management (CRUD + search + middle name)
 - Full visit tracking (CRUD + filtering + price/tips + practices)
 - Financial tracking (revenue, tips, status, average check)
 - Practice tracking ("Коррекция", "ТСЯ", "Лепило")
+- **Retreat management** (create, participants, expenses, profit tracking)
 - Statistics with year-end summaries
 - Beautiful, responsive UI in Russian with calming wellness theme
 
@@ -138,6 +177,7 @@
 - ✅ Dashboard and statistics produce correct counts for YTD, last 30, and selected ranges
 - ✅ UI is clean, calming, and fully responsive; no red-screen errors
 - ✅ Testing agent scenarios pass; logs clean; dates serialize correctly
+- ✅ Retreats can be created, managed, and tracked with full financial reporting
 
 ## 5) Potential Future Enhancements (Phase 3+)
 If the user requests additional features, consider:
