@@ -145,10 +145,12 @@ class ClientUpdate(BaseModel):
 
 # Visit Models
 DEFAULT_PRICE = 15000  # Default price in rubles
+AVAILABLE_PRACTICES = ["Коррекция", "ТСЯ", "Лепило"]  # Available practices
 
 class VisitCreate(BaseModel):
     date: str  # ISO date string YYYY-MM-DD
     topic: str = Field(..., min_length=1, max_length=200)
+    practices: List[str] = Field(default=[])  # Selected practices
     notes: Optional[str] = Field(None, max_length=5000)
     price: int = Field(default=DEFAULT_PRICE, ge=0)  # Price in rubles
     tips: int = Field(default=0, ge=0)  # Tips in rubles
@@ -156,6 +158,7 @@ class VisitCreate(BaseModel):
 class VisitUpdate(BaseModel):
     date: Optional[str] = None
     topic: Optional[str] = Field(None, min_length=1, max_length=200)
+    practices: Optional[List[str]] = None
     notes: Optional[str] = Field(None, max_length=5000)
     price: Optional[int] = Field(None, ge=0)
     tips: Optional[int] = Field(None, ge=0)
