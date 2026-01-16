@@ -371,16 +371,19 @@ function KPICard({ title, value, icon: Icon, delay, testId }) {
   );
 }
 
-function FinancialCard({ title, value, icon: Icon, color, delay, testId }) {
+function FinancialCard({ title, value, subtitle, icon: Icon, color, delay, testId }) {
   return (
     <Card className={`card-shadow animate-fade-in-up ${delay}`} data-testid={testId}>
       <CardContent className="pt-6">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex-1 min-w-0">
             <p className="text-sm text-muted-foreground">{title}</p>
             <p className="text-2xl font-bold text-[hsl(var(--foreground))] mt-1">{value}</p>
+            {subtitle && (
+              <p className="text-xs text-muted-foreground mt-1 truncate" title={subtitle}>{subtitle}</p>
+            )}
           </div>
-          <div className={`w-12 h-12 bg-[hsl(var(--${color})/0.1)] rounded-lg flex items-center justify-center`}>
+          <div className={`w-12 h-12 bg-[hsl(var(--${color})/0.1)] rounded-lg flex items-center justify-center flex-shrink-0 ml-3`}>
             <Icon className={`w-6 h-6 text-[hsl(var(--${color}))]`} />
           </div>
         </div>
