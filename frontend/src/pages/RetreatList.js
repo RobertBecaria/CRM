@@ -199,17 +199,24 @@ function RetreatCard({ retreat }) {
 }
 
 function CreateRetreatDialog({ onClose, onSuccess }) {
-  const [name, setName] = useState('');
   const [startDate, setStartDate] = useState(dayjs().format('YYYY-MM-DD'));
   const [endDate, setEndDate] = useState(dayjs().add(1, 'day').format('YYYY-MM-DD'));
   const [loading, setLoading] = useState(false);
+
+  // Auto-generate retreat name with dates
+  const generateRetreatName = () => {
+    const start = dayjs(startDate);
+    const end = dayjs(endDate);
+    return `Ретрит по Дыханию ${start.format('D')}-${end.format('D MMMM YYYY')}`;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await retreatsApi.create({ name, start_date: startDate, end_date: endDate });
+      const retreatName = generateRetreatName();
+      await retreatsApi.create({ name: retreatName, start_date: startDate, end_date: endDate });
       toast.success('Ретрит создан');
       onSuccess();
       onClose();
