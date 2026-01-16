@@ -109,6 +109,22 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/retreats"
+        element={
+          <ProtectedRoute>
+            <RetreatList />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/retreats/:id"
+        element={
+          <ProtectedRoute>
+            <RetreatDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/statistics"
         element={
           <ProtectedRoute>
