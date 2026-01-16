@@ -9,18 +9,18 @@
   },
   {
     "content": "Update visit form with price and tips inputs",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Show price, tips, status in visit list",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Add financial stats to Dashboard and Statistics pages",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Test all financial features",
-    "status": "pending"
+    "status": "in_progress"
   }
 ]
