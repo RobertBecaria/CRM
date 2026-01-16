@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { statsApi, topicsApi } from '../lib/api';
+import { statsApi } from '../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Skeleton } from '../components/ui/skeleton';
 import { Badge } from '../components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, Legend } from 'recharts';
-import { Calendar, Filter, Download, TrendingUp, Users, FileText, X } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
+import { Calendar, TrendingUp, Users, FileText, Banknote, Gift, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -18,6 +17,11 @@ import 'dayjs/locale/ru';
 dayjs.locale('ru');
 
 const COLORS = ['hsl(172 39% 40%)', 'hsl(187 45% 38%)', 'hsl(266 42% 62%)', 'hsl(38 92% 60%)', 'hsl(155 38% 40%)'];
+
+// Format currency
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(amount);
+}
 
 export default function Statistics() {
   const [year, setYear] = useState(dayjs().year());
@@ -83,8 +87,8 @@ export default function Statistics() {
         </div>
       </div>
 
-      {/* Summary KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      {/* Activity KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <Card className="card-shadow">
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
@@ -125,6 +129,55 @@ export default function Statistics() {
                 <p className="text-sm text-muted-foreground">Уникальных тем</p>
                 <p className="text-2xl font-bold" data-testid="stats-unique-topics">
                   {summary?.topic_distribution?.length || 0}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Financial KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <Card className="card-shadow">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[hsl(var(--success)/0.1)] rounded-lg flex items-center justify-center">
+                <Banknote className="w-6 h-6 text-[hsl(var(--success))]" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Общий доход</p>
+                <p className="text-2xl font-bold" data-testid="stats-total-revenue">
+                  {formatCurrency(summary?.total_revenue || 0)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="card-shadow">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[hsl(var(--chart-4)/0.1)] rounded-lg flex items-center justify-center">
+                <Gift className="w-6 h-6 text-[hsl(var(--chart-4))]" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Всего чаевых</p>
+                <p className="text-2xl font-bold" data-testid="stats-total-tips">
+                  {formatCurrency(summary?.total_tips || 0)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="card-shadow">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[hsl(var(--primary)/0.1)] rounded-lg flex items-center justify-center">
+                <Wallet className="w-6 h-6 text-[hsl(var(--primary))]" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Средний чек</p>
+                <p className="text-2xl font-bold" data-testid="stats-avg-check">
+                  {formatCurrency(summary?.avg_check || 0)}
                 </p>
               </div>
             </div>
@@ -203,7 +256,7 @@ export default function Statistics() {
       <Card className="card-shadow">
         <CardHeader>
           <CardTitle className="text-lg">Итоги по клиентам - {year} год</CardTitle>
-          <CardDescription>Количество визитов и темы по каждому клиенту</CardDescription>
+          <CardDescription>Визиты, доход и темы по каждому клиенту</CardDescription>
         </CardHeader>
         <CardContent>
           {summary?.client_summaries?.length > 0 ? (
@@ -213,6 +266,8 @@ export default function Statistics() {
                   <TableRow>
                     <TableHead>Имя клиента</TableHead>
                     <TableHead className="text-center">Визиты</TableHead>
+                    <TableHead className="text-right">Доход</TableHead>
+                    <TableHead className="text-right">Чаевые</TableHead>
                     <TableHead>Главные темы</TableHead>
                     <TableHead className="text-right">Действия</TableHead>
                   </TableRow>
@@ -223,6 +278,12 @@ export default function Statistics() {
                       <TableCell className="font-medium">{client.client_name}</TableCell>
                       <TableCell className="text-center">
                         <Badge variant="secondary">{client.visit_count}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        {formatCurrency(client.total_revenue || 0)}
+                      </TableCell>
+                      <TableCell className="text-right text-muted-foreground">
+                        {formatCurrency(client.total_tips || 0)}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
@@ -277,6 +338,15 @@ function StatisticsSkeleton() {
           <Skeleton className="h-4 w-32" />
         </div>
         <Skeleton className="h-10 w-32" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        {[1, 2, 3].map((i) => (
+          <Card key={i}>
+            <CardContent className="pt-6">
+              <Skeleton className="h-16 w-full" />
+            </CardContent>
+          </Card>
+        ))}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {[1, 2, 3].map((i) => (
