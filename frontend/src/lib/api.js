@@ -46,3 +46,8 @@ export const retreatsApi = {
   removeExpense: (retreatId, expenseId) => axios.delete(`${API_URL}/retreats/${retreatId}/expenses/${expenseId}`),
   getStats: (params = {}) => axios.get(`${API_URL}/stats/retreats`, { params }),
 };
+
+// Calendar API
+export const calendarApi = {
+  getEvents: (params = {}) => axios.get(`${API_URL}/calendar/events`, { params }),
+};
