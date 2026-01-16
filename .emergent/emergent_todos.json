@@ -1,19 +1,19 @@
 [
   {
     "content": "Add price and tips fields to visits in backend",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Add financial statistics to stats endpoints",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Update visit form with price and tips inputs",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Show price, tips, status in visit list",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Add financial stats to Dashboard and Statistics pages",
