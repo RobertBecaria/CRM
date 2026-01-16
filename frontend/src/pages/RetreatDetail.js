@@ -577,7 +577,7 @@ function EditParticipantDialog({ retreatId, participant, onClose, onSuccess }) {
 }
 
 function AddExpenseDialog({ retreatId, onClose, onSuccess }) {
-  const [name, setName] = useState('');
+  const [name, setName] = useState('Аренда помещения');
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
 
