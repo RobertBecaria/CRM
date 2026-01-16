@@ -488,7 +488,7 @@ async def get_stats_overview(
             client = await db.clients.find_one({"_id": ObjectId(visit["client_id"])})
             visit_data = serialize_doc(visit)
             if client:
-                visit_data["client_name"] = f"{client['first_name']} {client['last_name']}"
+                visit_data["client_name"] = format_client_name(client)
             enriched_visits.append(visit_data)
         except:
             pass
