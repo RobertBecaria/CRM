@@ -31,3 +31,18 @@ export const statsApi = {
 export const topicsApi = {
   getAll: () => axios.get(`${API_URL}/topics`),
 };
+
+// Retreats API
+export const retreatsApi = {
+  getAll: (params = {}) => axios.get(`${API_URL}/retreats`, { params }),
+  getOne: (id) => axios.get(`${API_URL}/retreats/${id}`),
+  create: (data) => axios.post(`${API_URL}/retreats`, data),
+  update: (id, data) => axios.put(`${API_URL}/retreats/${id}`, data),
+  delete: (id) => axios.delete(`${API_URL}/retreats/${id}`),
+  addParticipant: (retreatId, data) => axios.post(`${API_URL}/retreats/${retreatId}/participants`, data),
+  updateParticipant: (retreatId, clientId, data) => axios.put(`${API_URL}/retreats/${retreatId}/participants/${clientId}`, data),
+  removeParticipant: (retreatId, clientId) => axios.delete(`${API_URL}/retreats/${retreatId}/participants/${clientId}`),
+  addExpense: (retreatId, data) => axios.post(`${API_URL}/retreats/${retreatId}/expenses`, data),
+  removeExpense: (retreatId, expenseId) => axios.delete(`${API_URL}/retreats/${retreatId}/expenses/${expenseId}`),
+  getStats: (params = {}) => axios.get(`${API_URL}/stats/retreats`, { params }),
+};
