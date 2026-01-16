@@ -10,7 +10,7 @@ import { Skeleton } from '../components/ui/skeleton';
 import { Badge } from '../components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../components/ui/alert-dialog';
-import { ArrowLeft, Calendar, Edit, Trash2, Plus, User, FileText, X, ChevronLeft, ChevronRight, Loader2, Banknote, Gift, Heart } from 'lucide-react';
+import { ArrowLeft, Calendar, Edit, Trash2, Plus, User, FileText, X, ChevronLeft, ChevronRight, Loader2, Banknote, Gift, Heart, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
@@ -18,6 +18,7 @@ import 'dayjs/locale/ru';
 dayjs.locale('ru');
 
 const DEFAULT_PRICE = 15000;
+const AVAILABLE_PRACTICES = ['Коррекция', 'ТСЯ', 'Лепило'];
 
 // Helper function to get payment status
 function getPaymentStatus(price) {
@@ -332,6 +333,7 @@ export default function ClientDetail() {
                   {visits.map((visit) => {
                     const price = visit.price ?? DEFAULT_PRICE;
                     const tips = visit.tips ?? 0;
+                    const practices = visit.practices || [];
                     const status = getPaymentStatus(price);
                     const StatusIcon = status.icon;
                     
@@ -354,6 +356,17 @@ export default function ClientDetail() {
                                 {status.label}
                               </Badge>
                             </div>
+                            {/* Practices badges */}
+                            {practices.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mb-2">
+                                {practices.map((practice) => (
+                                  <Badge key={practice} variant="outline" className="text-xs bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]">
+                                    <Sparkles className="w-3 h-3 mr-1" />
+                                    {practice}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
                             <div className="flex flex-wrap gap-4 text-sm mb-2">
                               <span className="text-muted-foreground">
                                 Оплата: <span className="font-medium text-foreground">{formatCurrency(price)}</span>
@@ -446,6 +459,7 @@ export default function ClientDetail() {
 function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
   const [date, setDate] = useState(visit?.date || dayjs().format('YYYY-MM-DD'));
   const [topic, setTopic] = useState(visit?.topic || '');
+  const [practices, setPractices] = useState(visit?.practices || []);
   const [notes, setNotes] = useState(visit?.notes || '');
   const [price, setPrice] = useState(visit?.price ?? DEFAULT_PRICE);
   const [tips, setTips] = useState(visit?.tips ?? 0);
@@ -453,12 +467,27 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
 
   const status = getPaymentStatus(price);
 
+  const togglePractice = (practice) => {
+    setPractices(prev => 
+      prev.includes(practice) 
+        ? prev.filter(p => p !== practice)
+        : [...prev, practice]
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const data = { date, topic, notes, price: parseInt(price) || 0, tips: parseInt(tips) || 0 };
+      const data = { 
+        date, 
+        topic, 
+        practices,
+        notes, 
+        price: parseInt(price) || 0, 
+        tips: parseInt(tips) || 0 
+      };
       
       if (visit) {
         await visitsApi.update(visit.id, data);
@@ -541,6 +570,38 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
                 data-testid="visit-tips-input"
               />
             </div>
+          </div>
+
+          {/* Practices Selection */}
+          <div className="space-y-2">
+            <Label>Практики</Label>
+            <div className="flex flex-wrap gap-2">
+              {AVAILABLE_PRACTICES.map((practice) => {
+                const isSelected = practices.includes(practice);
+                return (
+                  <button
+                    key={practice}
+                    type="button"
+                    onClick={() => togglePractice(practice)}
+                    className={`
+                      px-4 py-2 rounded-full text-sm font-medium transition-all
+                      border-2 flex items-center gap-2
+                      ${isSelected 
+                        ? 'bg-[hsl(var(--primary))] text-white border-[hsl(var(--primary))]' 
+                        : 'bg-white text-[hsl(var(--foreground))] border-[hsl(var(--border))] hover:border-[hsl(var(--primary))]'
+                      }
+                    `}
+                    data-testid={`practice-${practice}`}
+                  >
+                    <Sparkles className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-[hsl(var(--primary))]'}`} />
+                    {practice}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Выберите одну или несколько практик
+            </p>
           </div>
 
           <div className="space-y-2">
