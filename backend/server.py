@@ -1186,6 +1186,8 @@ async def startup_db_client():
     await db.visits.create_index([("client_id", 1), ("date", -1)])
     await db.visits.create_index([("topic", 1)])
     await db.visits.create_index([("date", 1)])
+    await db.visits.create_index([("retreat_id", 1)])
+    await db.retreats.create_index([("start_date", -1)])
     await db.users.create_index([("email", 1)], unique=True)
     logger.info("Database indexes created")
 
