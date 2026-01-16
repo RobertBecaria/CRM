@@ -546,14 +546,14 @@ async def get_practice_stats_ytd():
     return [{"practice": p["_id"], "count": p["count"]} for p in result]
 
 async def get_financial_stats_ytd():
-    """Get financial statistics for current year"""
+    """Get financial statistics for current year (visits + retreats)"""
     now = datetime.now(timezone.utc)
     year_start = f"{now.year}-01-01"
     thirty_days_ago = (now - timedelta(days=30)).strftime("%Y-%m-%d")
     
-    # Revenue YTD
+    # Revenue from visits YTD (excluding retreat visits to avoid double counting)
     pipeline_ytd = [
-        {"$match": {"date": {"$gte": year_start}}},
+        {"$match": {"date": {"$gte": year_start}, "retreat_id": {"$eq": None}}},
         {"$group": {
             "_id": None,
             "total_revenue": {"$sum": {"$ifNull": ["$price", 15000]}},
@@ -562,11 +562,27 @@ async def get_financial_stats_ytd():
         }}
     ]
     result_ytd = await db.visits.aggregate(pipeline_ytd).to_list(1)
-    ytd_data = result_ytd[0] if result_ytd else {"total_revenue": 0, "total_tips": 0, "count": 0}
+    visits_ytd_data = result_ytd[0] if result_ytd else {"total_revenue": 0, "total_tips": 0, "count": 0}
     
-    # Revenue last 30 days
+    # Revenue from retreats YTD
+    retreat_query = {"start_date": {"$gte": year_start}}
+    retreats = await db.retreats.find(retreat_query).to_list(length=100)
+    
+    retreat_revenue = 0
+    retreat_expenses = 0
+    for retreat in retreats:
+        participants = retreat.get("participants", [])
+        expenses = retreat.get("expenses", [])
+        retreat_revenue += sum(p.get("payment", 0) for p in participants)
+        retreat_expenses += sum(e.get("amount", 0) for e in expenses)
+    
+    # Total YTD (visits + retreats)
+    total_revenue_ytd = visits_ytd_data["total_revenue"] + retreat_revenue
+    total_tips_ytd = visits_ytd_data["total_tips"]
+    
+    # Revenue last 30 days (visits only, excluding retreat visits)
     pipeline_30 = [
-        {"$match": {"date": {"$gte": thirty_days_ago}}},
+        {"$match": {"date": {"$gte": thirty_days_ago}, "retreat_id": {"$eq": None}}},
         {"$group": {
             "_id": None,
             "total_revenue": {"$sum": {"$ifNull": ["$price", 15000]}},
@@ -575,16 +591,34 @@ async def get_financial_stats_ytd():
         }}
     ]
     result_30 = await db.visits.aggregate(pipeline_30).to_list(1)
-    last_30_data = result_30[0] if result_30 else {"total_revenue": 0, "total_tips": 0, "count": 0}
+    visits_30_data = result_30[0] if result_30 else {"total_revenue": 0, "total_tips": 0, "count": 0}
     
-    avg_check_ytd = ytd_data["total_revenue"] / ytd_data["count"] if ytd_data["count"] > 0 else 0
+    # Retreats last 30 days
+    retreat_query_30 = {"start_date": {"$gte": thirty_days_ago}}
+    retreats_30 = await db.retreats.find(retreat_query_30).to_list(length=50)
+    
+    retreat_revenue_30 = 0
+    for retreat in retreats_30:
+        participants = retreat.get("participants", [])
+        retreat_revenue_30 += sum(p.get("payment", 0) for p in participants)
+    
+    total_revenue_30 = visits_30_data["total_revenue"] + retreat_revenue_30
+    total_tips_30 = visits_30_data["total_tips"]
+    
+    # Calculate totals for average check (visits only for meaningful avg)
+    total_count = visits_ytd_data["count"]
+    avg_check_ytd = visits_ytd_data["total_revenue"] / total_count if total_count > 0 else 0
     
     return {
-        "revenue_ytd": ytd_data["total_revenue"],
-        "tips_ytd": ytd_data["total_tips"],
-        "revenue_last_30": last_30_data["total_revenue"],
-        "tips_last_30": last_30_data["total_tips"],
-        "avg_check": round(avg_check_ytd)
+        "revenue_ytd": total_revenue_ytd,
+        "tips_ytd": total_tips_ytd,
+        "revenue_last_30": total_revenue_30,
+        "tips_last_30": total_tips_30,
+        "avg_check": round(avg_check_ytd),
+        "retreat_revenue_ytd": retreat_revenue,
+        "retreat_expenses_ytd": retreat_expenses,
+        "retreat_profit_ytd": retreat_revenue - retreat_expenses,
+        "visits_revenue_ytd": visits_ytd_data["total_revenue"]
     }
 
 @api_router.get("/stats/client/{client_id}")
