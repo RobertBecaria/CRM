@@ -117,13 +117,13 @@ export default function Dashboard() {
       {/* Financial KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
         <FinancialCard
-          title="Общий доход"
-          value={formatCurrency((financial.revenue_ytd || 0) + (financial.tips_ytd || 0))}
-          subtitle={`Визиты: ${formatCurrency(financial.visits_revenue_ytd || 0)} + Ретриты: ${formatCurrency(financial.retreat_revenue_ytd || 0)} + Чаевые: ${formatCurrency(financial.tips_ytd || 0)}`}
+          title="Чистая прибыль"
+          value={formatCurrency((financial.revenue_ytd || 0) + (financial.tips_ytd || 0) - (financial.retreat_expenses_ytd || 0))}
+          subtitle={`Доход: ${formatCurrency((financial.revenue_ytd || 0) + (financial.tips_ytd || 0))} − Расходы: ${formatCurrency(financial.retreat_expenses_ytd || 0)}`}
           icon={Banknote}
           color="primary"
           delay="stagger-1"
-          testId="kpi-revenue-ytd"
+          testId="kpi-net-profit-ytd"
         />
         <FinancialCard
           title="Доход за 30 дней"
@@ -134,17 +134,18 @@ export default function Dashboard() {
           testId="kpi-revenue-30"
         />
         <FinancialCard
-          title="Чаевые за год"
-          value={formatCurrency(financial.tips_ytd || 0)}
-          icon={Gift}
-          color="chart-3"
+          title="Расходы на ретриты"
+          value={formatCurrency(financial.retreat_expenses_ytd || 0)}
+          subtitle={`Прибыль ретритов: ${formatCurrency(financial.retreat_profit_ytd || 0)}`}
+          icon={TrendingUp}
+          color="destructive"
           delay="stagger-3"
-          testId="kpi-tips-ytd"
+          testId="kpi-retreat-expenses"
         />
         <FinancialCard
           title="Средний чек"
           value={formatCurrency(financial.avg_check || 0)}
-          icon={TrendingUp}
+          icon={Gift}
           color="success"
           delay="stagger-4"
           testId="kpi-avg-check"
