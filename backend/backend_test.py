@@ -471,6 +471,12 @@ def main():
     print("\n📍 PHASE 5: Statistics")
     print("-" * 60)
     tester.test_stats_overview()
+    
+    # Test 5.1: Detailed Financial Statistics (Focus on retreat expenses)
+    print("\n📍 PHASE 5.1: Financial Statistics (Retreat Expenses Focus)")
+    print("-" * 60)
+    tester.test_financial_stats_detailed()
+    
     tester.test_yearly_summary(2024)
     tester.test_get_topics()
     
