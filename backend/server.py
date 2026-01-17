@@ -1321,6 +1321,255 @@ async def get_retreat_stats(
         "net_profit": total_revenue - total_expenses
     }
 
+# ==================== SETTINGS ROUTES ====================
+
+class SettingsUpdate(BaseModel):
+    default_visit_price: Optional[int] = Field(None, ge=0)
+    default_retreat_price: Optional[int] = Field(None, ge=0)
+    practices: Optional[List[str]] = None
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str = Field(..., min_length=6)
+
+class BackupData(BaseModel):
+    clients: List[dict]
+    visits: List[dict]
+    retreats: List[dict]
+    settings: Optional[dict] = None
+
+@api_router.get("/settings")
+async def get_settings(current_user: dict = Depends(get_current_user)):
+    """Get application settings"""
+    settings = await db.settings.find_one({"type": "app_settings"})
+    if not settings:
+        # Return defaults
+        return {
+            "default_visit_price": DEFAULT_PRICE,
+            "default_retreat_price": DEFAULT_RETREAT_PRICE,
+            "practices": AVAILABLE_PRACTICES
+        }
+    return {
+        "default_visit_price": settings.get("default_visit_price", DEFAULT_PRICE),
+        "default_retreat_price": settings.get("default_retreat_price", DEFAULT_RETREAT_PRICE),
+        "practices": settings.get("practices", AVAILABLE_PRACTICES)
+    }
+
+@api_router.put("/settings")
+async def update_settings(
+    settings_data: SettingsUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update application settings"""
+    update_doc = {"type": "app_settings", "updated_at": datetime.now(timezone.utc)}
+    
+    if settings_data.default_visit_price is not None:
+        update_doc["default_visit_price"] = settings_data.default_visit_price
+    if settings_data.default_retreat_price is not None:
+        update_doc["default_retreat_price"] = settings_data.default_retreat_price
+    if settings_data.practices is not None:
+        update_doc["practices"] = settings_data.practices
+    
+    await db.settings.update_one(
+        {"type": "app_settings"},
+        {"$set": update_doc},
+        upsert=True
+    )
+    
+    return await get_settings(current_user)
+
+@api_router.put("/auth/change-password")
+async def change_password(
+    password_data: PasswordChange,
+    current_user: dict = Depends(get_current_user)
+):
+    """Change user password"""
+    # Get full user with password hash
+    user = await db.users.find_one({"email": current_user["email"]})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Verify current password
+    if not verify_password(password_data.current_password, user["password_hash"]):
+        raise HTTPException(status_code=400, detail="Неверный текущий пароль")
+    
+    # Update password
+    new_hash = get_password_hash(password_data.new_password)
+    await db.users.update_one(
+        {"_id": user["_id"]},
+        {"$set": {"password_hash": new_hash, "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    return {"message": "Пароль успешно изменён"}
+
+@api_router.get("/stats/database")
+async def get_database_stats(current_user: dict = Depends(get_current_user)):
+    """Get database statistics"""
+    # Counts
+    clients_count = await db.clients.count_documents({})
+    visits_count = await db.visits.count_documents({})
+    retreats_count = await db.retreats.count_documents({})
+    total_records = clients_count + visits_count + retreats_count
+    
+    # Oldest record
+    oldest_client = await db.clients.find_one({}, sort=[("created_at", 1)])
+    oldest_visit = await db.visits.find_one({}, sort=[("created_at", 1)])
+    oldest_retreat = await db.retreats.find_one({}, sort=[("created_at", 1)])
+    
+    oldest_dates = []
+    if oldest_client and oldest_client.get("created_at"):
+        oldest_dates.append(oldest_client["created_at"])
+    if oldest_visit and oldest_visit.get("created_at"):
+        oldest_dates.append(oldest_visit["created_at"])
+    if oldest_retreat and oldest_retreat.get("created_at"):
+        oldest_dates.append(oldest_retreat["created_at"])
+    
+    oldest_record = min(oldest_dates).isoformat() if oldest_dates else None
+    
+    # Latest update
+    latest_client = await db.clients.find_one({}, sort=[("updated_at", -1)])
+    latest_visit = await db.visits.find_one({}, sort=[("updated_at", -1)])
+    latest_retreat = await db.retreats.find_one({}, sort=[("updated_at", -1)])
+    
+    latest_dates = []
+    if latest_client and latest_client.get("updated_at"):
+        latest_dates.append(latest_client["updated_at"])
+    if latest_visit and latest_visit.get("updated_at"):
+        latest_dates.append(latest_visit["updated_at"])
+    if latest_retreat and latest_retreat.get("updated_at"):
+        latest_dates.append(latest_retreat["updated_at"])
+    
+    last_update = max(latest_dates).isoformat() if latest_dates else None
+    
+    return {
+        "clients_count": clients_count,
+        "visits_count": visits_count,
+        "retreats_count": retreats_count,
+        "total_records": total_records,
+        "oldest_record": oldest_record,
+        "last_update": last_update
+    }
+
+@api_router.get("/backup")
+async def download_backup(current_user: dict = Depends(get_current_user)):
+    """Download database backup as JSON"""
+    # Get all data
+    clients = await db.clients.find({}).to_list(length=10000)
+    visits = await db.visits.find({}).to_list(length=100000)
+    retreats = await db.retreats.find({}).to_list(length=10000)
+    settings = await db.settings.find_one({"type": "app_settings"})
+    
+    # Serialize
+    backup_data = {
+        "version": "1.0",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "clients": serialize_doc(clients),
+        "visits": serialize_doc(visits),
+        "retreats": serialize_doc(retreats),
+        "settings": serialize_doc(settings) if settings else None
+    }
+    
+    return backup_data
+
+@api_router.post("/restore")
+async def restore_backup(
+    backup_data: BackupData,
+    current_user: dict = Depends(get_current_user)
+):
+    """Restore database from backup JSON"""
+    try:
+        # Clear existing data
+        await db.clients.delete_many({})
+        await db.visits.delete_many({})
+        await db.retreats.delete_many({})
+        
+        restored_counts = {"clients": 0, "visits": 0, "retreats": 0}
+        
+        # Restore clients
+        if backup_data.clients:
+            for client in backup_data.clients:
+                # Convert id back to _id and handle ObjectId
+                if "id" in client:
+                    try:
+                        client["_id"] = ObjectId(client.pop("id"))
+                    except:
+                        client.pop("id", None)
+                # Convert date strings back to datetime
+                if "created_at" in client and isinstance(client["created_at"], str):
+                    try:
+                        client["created_at"] = datetime.fromisoformat(client["created_at"].replace("Z", "+00:00"))
+                    except:
+                        client["created_at"] = datetime.now(timezone.utc)
+                if "updated_at" in client and isinstance(client["updated_at"], str):
+                    try:
+                        client["updated_at"] = datetime.fromisoformat(client["updated_at"].replace("Z", "+00:00"))
+                    except:
+                        client["updated_at"] = datetime.now(timezone.utc)
+                await db.clients.insert_one(client)
+                restored_counts["clients"] += 1
+        
+        # Restore visits
+        if backup_data.visits:
+            for visit in backup_data.visits:
+                if "id" in visit:
+                    try:
+                        visit["_id"] = ObjectId(visit.pop("id"))
+                    except:
+                        visit.pop("id", None)
+                if "created_at" in visit and isinstance(visit["created_at"], str):
+                    try:
+                        visit["created_at"] = datetime.fromisoformat(visit["created_at"].replace("Z", "+00:00"))
+                    except:
+                        visit["created_at"] = datetime.now(timezone.utc)
+                if "updated_at" in visit and isinstance(visit["updated_at"], str):
+                    try:
+                        visit["updated_at"] = datetime.fromisoformat(visit["updated_at"].replace("Z", "+00:00"))
+                    except:
+                        visit["updated_at"] = datetime.now(timezone.utc)
+                await db.visits.insert_one(visit)
+                restored_counts["visits"] += 1
+        
+        # Restore retreats
+        if backup_data.retreats:
+            for retreat in backup_data.retreats:
+                if "id" in retreat:
+                    try:
+                        retreat["_id"] = ObjectId(retreat.pop("id"))
+                    except:
+                        retreat.pop("id", None)
+                if "created_at" in retreat and isinstance(retreat["created_at"], str):
+                    try:
+                        retreat["created_at"] = datetime.fromisoformat(retreat["created_at"].replace("Z", "+00:00"))
+                    except:
+                        retreat["created_at"] = datetime.now(timezone.utc)
+                if "updated_at" in retreat and isinstance(retreat["updated_at"], str):
+                    try:
+                        retreat["updated_at"] = datetime.fromisoformat(retreat["updated_at"].replace("Z", "+00:00"))
+                    except:
+                        retreat["updated_at"] = datetime.now(timezone.utc)
+                await db.retreats.insert_one(retreat)
+                restored_counts["retreats"] += 1
+        
+        # Restore settings
+        if backup_data.settings:
+            settings = backup_data.settings
+            if "id" in settings:
+                settings.pop("id", None)
+            settings["type"] = "app_settings"
+            await db.settings.update_one(
+                {"type": "app_settings"},
+                {"$set": settings},
+                upsert=True
+            )
+        
+        return {
+            "message": "Данные успешно восстановлены",
+            "restored": restored_counts
+        }
+    except Exception as e:
+        logger.error(f"Restore failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ошибка восстановления: {str(e)}")
+
 # Health check
 @api_router.get("/health")
 async def health_check():
