@@ -26,6 +26,7 @@ export const statsApi = {
   getClientStats: (clientId, params = {}) => axios.get(`${API_URL}/stats/client/${clientId}`, { params }),
   getTopicsStats: (params = {}) => axios.get(`${API_URL}/stats/topics`, { params }),
   getYearlySummary: (year) => axios.get(`${API_URL}/stats/yearly-summary`, { params: { year } }),
+  getDatabaseStats: () => axios.get(`${API_URL}/stats/database`),
 };
 
 // Topics API
@@ -51,4 +52,13 @@ export const retreatsApi = {
 // Calendar API
 export const calendarApi = {
   getEvents: (params = {}) => axios.get(`${API_URL}/calendar/events`, { params }),
+};
+
+// Settings API
+export const settingsApi = {
+  get: () => axios.get(`${API_URL}/settings`),
+  update: (data) => axios.put(`${API_URL}/settings`, data),
+  changePassword: (data) => axios.put(`${API_URL}/auth/change-password`, data),
+  getBackup: () => axios.get(`${API_URL}/backup`),
+  restore: (data) => axios.post(`${API_URL}/restore`, data),
 };
