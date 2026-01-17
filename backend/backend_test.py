@@ -270,6 +270,97 @@ class KinesioCRMTester:
             print(f"   ✓ Visits last 30 days: {response.get('visits_last_30')}")
         return success
 
+    def test_financial_stats_detailed(self):
+        """Test financial statistics in detail - focusing on retreat expenses"""
+        success, response = self.run_test(
+            "Get Financial Stats (Detailed)",
+            "GET",
+            "stats/overview",
+            200
+        )
+        
+        if not success:
+            return False
+            
+        # Check if financial object exists
+        financial = response.get('financial')
+        if not financial:
+            self.log_test("Financial Stats - Structure", False, "Missing 'financial' object in response")
+            return False
+        
+        print(f"   ✓ Financial object found")
+        
+        # Required fields for retreat expenses functionality
+        required_fields = [
+            'retreat_expenses_ytd',
+            'retreat_profit_ytd', 
+            'revenue_ytd',
+            'tips_ytd'
+        ]
+        
+        missing_fields = []
+        for field in required_fields:
+            if field not in financial:
+                missing_fields.append(field)
+        
+        if missing_fields:
+            self.log_test("Financial Stats - Required Fields", False, f"Missing fields: {missing_fields}")
+            return False
+        
+        print(f"   ✓ All required fields present: {required_fields}")
+        
+        # Validate field types and values
+        retreat_expenses = financial.get('retreat_expenses_ytd')
+        retreat_profit = financial.get('retreat_profit_ytd')
+        revenue_ytd = financial.get('revenue_ytd')
+        tips_ytd = financial.get('tips_ytd')
+        
+        # Check if retreat_expenses_ytd is a number >= 0
+        if not isinstance(retreat_expenses, (int, float)) or retreat_expenses < 0:
+            self.log_test("Financial Stats - Retreat Expenses Type", False, f"retreat_expenses_ytd should be number >= 0, got: {retreat_expenses}")
+            return False
+        
+        print(f"   ✓ retreat_expenses_ytd: {retreat_expenses} (valid)")
+        
+        # Check if retreat_profit_ytd is a number (can be negative)
+        if not isinstance(retreat_profit, (int, float)):
+            self.log_test("Financial Stats - Retreat Profit Type", False, f"retreat_profit_ytd should be number, got: {retreat_profit}")
+            return False
+        
+        print(f"   ✓ retreat_profit_ytd: {retreat_profit} (valid)")
+        
+        # Check if revenue_ytd is a number >= 0
+        if not isinstance(revenue_ytd, (int, float)) or revenue_ytd < 0:
+            self.log_test("Financial Stats - Revenue Type", False, f"revenue_ytd should be number >= 0, got: {revenue_ytd}")
+            return False
+        
+        print(f"   ✓ revenue_ytd: {revenue_ytd} (valid)")
+        
+        # Check if tips_ytd is a number >= 0
+        if not isinstance(tips_ytd, (int, float)) or tips_ytd < 0:
+            self.log_test("Financial Stats - Tips Type", False, f"tips_ytd should be number >= 0, got: {tips_ytd}")
+            return False
+        
+        print(f"   ✓ tips_ytd: {tips_ytd} (valid)")
+        
+        # Additional validation: Check if retreat_profit calculation makes sense
+        retreat_revenue = financial.get('retreat_revenue_ytd', 0)
+        if isinstance(retreat_revenue, (int, float)):
+            expected_profit = retreat_revenue - retreat_expenses
+            if abs(retreat_profit - expected_profit) > 0.01:  # Allow small floating point differences
+                self.log_test("Financial Stats - Profit Calculation", False, 
+                            f"retreat_profit_ytd ({retreat_profit}) != retreat_revenue_ytd ({retreat_revenue}) - retreat_expenses_ytd ({retreat_expenses}) = {expected_profit}")
+                return False
+            print(f"   ✓ Profit calculation correct: {retreat_revenue} - {retreat_expenses} = {retreat_profit}")
+        
+        # Print all financial stats for verification
+        print(f"   📊 Complete Financial Stats:")
+        for key, value in financial.items():
+            print(f"      {key}: {value}")
+        
+        self.log_test("Financial Stats - Complete Validation", True, "All financial statistics validated successfully")
+        return True
+
     def test_yearly_summary(self, year):
         """Test yearly summary"""
         success, response = self.run_test(
