@@ -865,10 +865,11 @@ async def get_calendar_events(
     """Get all events (visits and retreats) for calendar view"""
     events = []
     
-    # Get visits
+    # Get visits (excluding retreat-linked visits to avoid duplicates)
     if event_type in [None, "all", "visits"]:
         visit_query = {
-            "date": {"$gte": start_date, "$lte": end_date}
+            "date": {"$gte": start_date, "$lte": end_date},
+            "retreat_id": {"$eq": None}  # Exclude retreat-linked visits
         }
         if client_id:
             visit_query["client_id"] = client_id
