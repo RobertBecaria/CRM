@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
-import { Heart, LayoutDashboard, Users, BarChart3, LogOut, Menu, X, User, Mountain, CalendarDays } from 'lucide-react';
+import { Heart, LayoutDashboard, Users, BarChart3, LogOut, Menu, X, User, Mountain, CalendarDays, Settings } from 'lucide-react';
 
 const navItems = [
   { path: '/dashboard', label: 'Главная', icon: LayoutDashboard },
