@@ -72,6 +72,11 @@ export default function Layout({ children }) {
                   <span className="truncate">{user?.email}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/settings')} data-testid="settings-button">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Настройки
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive" data-testid="logout-button">
                   <LogOut className="w-4 h-4 mr-2" />
                   Выйти
