@@ -139,74 +139,8 @@ export default function Dashboard() {
 
       {/* Charts and Lists */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Visits Over Time Chart */}
-        <Card className="lg:col-span-4 card-shadow animate-fade-in-up">
-          <CardHeader>
-            <CardTitle className="text-lg">Визиты по времени</CardTitle>
-            <CardDescription>Активность за 12 месяцев</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {stats?.visits_over_time?.length > 0 ? (
-              <div className="h-64 w-full" data-testid="visits-over-time-chart">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={stats.visits_over_time} margin={{ left: 8, right: 16, top: 8, bottom: 8 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E6F0EE" />
-                    <XAxis dataKey="label" tick={{ fontSize: 10 }} />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip />
-                    <Line 
-                      type="monotone" 
-                      dataKey="visits" 
-                      stroke="hsl(187 45% 38%)" 
-                      strokeWidth={2} 
-                      dot={false} 
-                      name="Визиты"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="h-64 flex items-center justify-center text-muted-foreground" data-testid="chart-empty">
-                Пока нет данных о визитах.
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Top Topics */}
-        <Card className="lg:col-span-4 card-shadow animate-fade-in-up stagger-2">
-          <CardHeader>
-            <CardTitle className="text-lg">Популярные темы</CardTitle>
-            <CardDescription>Самые частые темы визитов</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {stats?.top_topics?.length > 0 ? (
-              <div className="space-y-3" data-testid="top-topics-list">
-                {stats.top_topics.map((topic, index) => (
-                  <div key={topic.topic} className="flex items-center justify-between">
-                    <span className="text-sm truncate flex-1 mr-2">{topic.topic}</span>
-                    <Badge variant="secondary" className="shrink-0">
-                      {topic.count}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="py-8 text-center text-muted-foreground text-sm">
-                Темы ещё не записаны
-              </div>
-            )}
-            <Link to="/statistics" className="block mt-4">
-              <Button variant="outline" className="w-full" data-testid="view-all-topics-button">
-                Вся статистика
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
         {/* Practices Statistics */}
-        <Card className="lg:col-span-4 card-shadow animate-fade-in-up stagger-3">
+        <Card className="lg:col-span-6 card-shadow animate-fade-in-up">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-[hsl(var(--primary))]" />
