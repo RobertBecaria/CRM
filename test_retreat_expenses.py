@@ -17,7 +17,18 @@ class RetreatExpenseTester:
 
     def authenticate(self):
         """Get authentication token"""
-        # Try to register first
+        # Try existing admin credentials first
+        try:
+            response = requests.post(f"{self.base_url}/auth/login", 
+                                   json={"email": "admin@test.com", "password": "password123"})
+            if response.status_code == 200:
+                self.token = response.json()['access_token']
+                print("✅ Authenticated with existing admin credentials")
+                return True
+        except Exception as e:
+            print(f"Login attempt failed: {e}")
+        
+        # Try to register with a new email
         test_email = f"retreat_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}@test.com"
         test_password = "password123"
         
@@ -28,19 +39,10 @@ class RetreatExpenseTester:
                 self.token = response.json()['access_token']
                 print(f"✅ Registered and authenticated as {test_email}")
                 return True
-        except:
-            pass
-        
-        # Try existing admin credentials
-        try:
-            response = requests.post(f"{self.base_url}/auth/login", 
-                                   json={"email": "admin@test.com", "password": "password123"})
-            if response.status_code == 200:
-                self.token = response.json()['access_token']
-                print("✅ Authenticated with existing admin credentials")
-                return True
-        except:
-            pass
+            else:
+                print(f"Registration failed: {response.status_code} - {response.text}")
+        except Exception as e:
+            print(f"Registration attempt failed: {e}")
         
         print("❌ Failed to authenticate")
         return False
