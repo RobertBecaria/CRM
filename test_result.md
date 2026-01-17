@@ -101,3 +101,48 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Fix the dashboard to subtract retreat expenses from total income to show net profit instead of gross income"
+
+backend:
+  - task: "Financial statistics API returns retreat expenses data"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Backend already correctly calculates retreat_expenses_ytd and retreat_profit_ytd in get_financial_stats_ytd()"
+
+frontend:
+  - task: "Dashboard shows net profit (income minus expenses)"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Dashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated Dashboard.js to show 'Чистая прибыль' (Net Profit) = revenue + tips - retreat_expenses. Added new card for 'Расходы на ретриты' (Retreat Expenses) with retreat profit in subtitle"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Financial statistics API returns retreat expenses data"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Updated Dashboard to subtract retreat expenses from total income. Now shows 'Чистая прибыль' (Net Profit) instead of 'Общий доход' (Gross Income). Also added a dedicated card for retreat expenses. Please test the /api/stats/overview endpoint to verify retreat_expenses_ytd and retreat_profit_ytd are returned correctly."
