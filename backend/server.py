@@ -530,13 +530,13 @@ async def get_stats_overview(
     }
 
 async def get_practice_stats_ytd():
-    """Get practice statistics for current year"""
+    """Get practice statistics for current year (personal visits only, excluding retreats)"""
     now = datetime.now(timezone.utc)
     year_start = f"{now.year}-01-01"
     
-    # Count practices YTD
+    # Count practices YTD - exclude retreat visits
     pipeline = [
-        {"$match": {"date": {"$gte": year_start}}},
+        {"$match": {"date": {"$gte": year_start}, "retreat_id": {"$eq": None}}},
         {"$unwind": {"path": "$practices", "preserveNullAndEmptyArrays": False}},
         {"$group": {"_id": "$practices", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}}
