@@ -45,6 +45,7 @@ export default function ClientDetail() {
   const navigate = useNavigate();
   const [client, setClient] = useState(null);
   const [visits, setVisits] = useState([]);
+  const [practiceStats, setPracticeStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [visitsLoading, setVisitsLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -57,6 +58,7 @@ export default function ClientDetail() {
 
   useEffect(() => {
     fetchClient();
+    fetchPracticeStats();
   }, [id]);
 
   useEffect(() => {
@@ -75,6 +77,15 @@ export default function ClientDetail() {
       navigate('/clients');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPracticeStats = async () => {
+    try {
+      const response = await clientsApi.getPracticeStats(id);
+      setPracticeStats(response.data);
+    } catch (err) {
+      console.error('Failed to fetch practice stats:', err);
     }
   };
 
