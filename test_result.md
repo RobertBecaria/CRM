@@ -116,6 +116,9 @@ backend:
       - working: true
         agent: "main"
         comment: "Backend already correctly calculates retreat_expenses_ytd and retreat_profit_ytd in get_financial_stats_ytd()"
+      - working: true
+        agent: "testing"
+        comment: "✅ COMPREHENSIVE TESTING COMPLETED: /api/stats/overview endpoint fully validated. All required financial fields present and correctly calculated: retreat_expenses_ytd, retreat_profit_ytd, revenue_ytd, tips_ytd. Tested with real retreat data (90,000 revenue, 31,000 expenses = 59,000 profit). Authentication working. All API responses correct. Backend implementation is solid."
 
 frontend:
   - task: "Dashboard shows net profit (income minus expenses)"
@@ -133,12 +136,12 @@ frontend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 1
+  test_sequence: 2
   run_ui: false
 
 test_plan:
   current_focus:
-    - "Financial statistics API returns retreat expenses data"
+    - "Dashboard shows net profit (income minus expenses)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -146,3 +149,5 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "Updated Dashboard to subtract retreat expenses from total income. Now shows 'Чистая прибыль' (Net Profit) instead of 'Общий доход' (Gross Income). Also added a dedicated card for retreat expenses. Please test the /api/stats/overview endpoint to verify retreat_expenses_ytd and retreat_profit_ytd are returned correctly."
+  - agent: "testing"
+    message: "✅ BACKEND TESTING COMPLETE: Financial statistics API (/api/stats/overview) is working perfectly. All required fields (retreat_expenses_ytd, retreat_profit_ytd, revenue_ytd, tips_ytd) are present and correctly calculated. Tested with real data: created retreat with 90,000 revenue and 31,000 expenses, API correctly returned 59,000 profit. Authentication working. Backend implementation is solid and ready. Frontend testing needed next."
