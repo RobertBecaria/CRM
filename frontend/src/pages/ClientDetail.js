@@ -393,28 +393,44 @@ export default function ClientDetail() {
                     const practices = visit.practices || [];
                     const status = getPaymentStatus(price);
                     const StatusIcon = status.icon;
+                    const isRetreat = !!visit.retreat_id;
                     
                     return (
-                      <div key={visit.id} className="py-4 first:pt-0 last:pb-0" data-testid={`visit-${visit.id}`}>
+                      <div 
+                        key={visit.id} 
+                        className={`py-4 first:pt-0 last:pb-0 ${isRetreat ? 'bg-purple-50 -mx-4 px-4 border-l-4 border-purple-500' : ''}`}
+                        data-testid={`visit-${visit.id}`}
+                      >
                         <div className="flex justify-between items-start gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <Calendar className="w-4 h-4 text-muted-foreground" />
+                              {isRetreat ? (
+                                <Mountain className="w-4 h-4 text-purple-500" />
+                              ) : (
+                                <Calendar className="w-4 h-4 text-muted-foreground" />
+                              )}
                               <span className="font-medium">
                                 {dayjs(visit.date).format('D MMMM YYYY')}
                               </span>
                             </div>
                             <div className="flex flex-wrap items-center gap-2 mb-2">
-                              <Badge variant="secondary">
-                                {visit.topic}
-                              </Badge>
+                              {isRetreat ? (
+                                <Badge className="bg-purple-500 text-white hover:bg-purple-600">
+                                  <Mountain className="w-3 h-3 mr-1" />
+                                  РЕТРИТ
+                                </Badge>
+                              ) : (
+                                <Badge variant="secondary">
+                                  {visit.topic}
+                                </Badge>
+                              )}
                               <Badge variant={status.variant} className="flex items-center gap-1">
                                 <StatusIcon className="w-3 h-3" />
                                 {status.label}
                               </Badge>
                             </div>
-                            {/* Practices badges */}
-                            {practices.length > 0 && (
+                            {/* Practices badges - only for non-retreat visits */}
+                            {!isRetreat && practices.length > 0 && (
                               <div className="flex flex-wrap gap-1 mb-2">
                                 {practices.map((practice) => (
                                   <Badge key={practice} variant="outline" className="text-xs bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]">
@@ -426,7 +442,7 @@ export default function ClientDetail() {
                             )}
                             <div className="flex flex-wrap gap-4 text-sm mb-2">
                               <span className="text-muted-foreground">
-                                Оплата: <span className="font-medium text-foreground">{formatCurrency(price)}</span>
+                                Оплата: <span className={`font-medium ${isRetreat ? 'text-purple-700' : 'text-foreground'}`}>{formatCurrency(price)}</span>
                               </span>
                               {tips > 0 && (
                                 <span className="text-muted-foreground">
@@ -440,40 +456,43 @@ export default function ClientDetail() {
                               </p>
                             )}
                           </div>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => { setEditingVisit(visit); setVisitDialogOpen(true); }}
-                              data-testid={`edit-visit-${visit.id}`}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" data-testid={`delete-visit-${visit.id}`}>
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Удалить визит?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Это навсегда удалит эту запись о визите.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Отмена</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDeleteVisit(visit.id)}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  >
-                                    Удалить
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
+                          {/* Only show edit/delete buttons for non-retreat visits */}
+                          {!isRetreat && (
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => { setEditingVisit(visit); setVisitDialogOpen(true); }}
+                                data-testid={`edit-visit-${visit.id}`}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" data-testid={`delete-visit-${visit.id}`}>
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Удалить визит?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Это навсегда удалит эту запись о визите.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleDeleteVisit(visit.id)}
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                      Удалить
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
