@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button';
 import { Skeleton } from '../components/ui/skeleton';
 import { Badge } from '../components/ui/badge';
-import { Users, Calendar, TrendingUp, Activity, Plus, ArrowRight, Banknote, Gift, Wallet, Sparkles, Mountain } from 'lucide-react';
+import { Users, Calendar, TrendingUp, Activity, Plus, ArrowRight, Banknote, Gift, Wallet, Sparkles, Mountain, Receipt } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
