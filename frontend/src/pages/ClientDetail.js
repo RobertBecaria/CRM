@@ -231,12 +231,45 @@ export default function ClientDetail() {
                 </a>
               </div>
             )}
-            <div>
-              <p className="text-sm text-muted-foreground">Всего визитов</p>
-              <p className="text-2xl font-bold text-[hsl(var(--primary))]" data-testid="client-visit-count">
-                {client?.visit_count || 0}
-              </p>
-            </div>
+            
+            {/* Practice Stats Summary */}
+            {practiceStats && (
+              <div className="pt-2 border-t">
+                <p className="text-sm text-muted-foreground mb-2">Статистика</p>
+                <div className="space-y-2">
+                  {/* Personal visits */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm flex items-center gap-2">
+                      <User className="w-4 h-4 text-[hsl(var(--primary))]" />
+                      Личные визиты
+                    </span>
+                    <Badge variant="secondary">{practiceStats.personal_visits_count || 0}</Badge>
+                  </div>
+                  {/* Retreats */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm flex items-center gap-2">
+                      <Mountain className="w-4 h-4 text-purple-500" />
+                      Ретриты
+                    </span>
+                    <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100">{practiceStats.retreat_count || 0}</Badge>
+                  </div>
+                  {/* Practices breakdown */}
+                  {AVAILABLE_PRACTICES.map(practice => {
+                    const count = practiceStats.practice_counts?.[practice] || 0;
+                    return (
+                      <div key={practice} className="flex items-center justify-between">
+                        <span className="text-sm flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-[hsl(var(--accent-foreground))]" />
+                          {practice}
+                        </span>
+                        <Badge variant="outline">{count}</Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            
             <div>
               <p className="text-sm text-muted-foreground">Клиент с</p>
               <p className="font-medium">
