@@ -9,6 +9,7 @@ export const clientsApi = {
   create: (data) => axios.post(`${API_URL}/clients`, data),
   update: (id, data) => axios.put(`${API_URL}/clients/${id}`, data),
   delete: (id) => axios.delete(`${API_URL}/clients/${id}`),
+  getPracticeStats: (id) => axios.get(`${API_URL}/clients/${id}/practice-stats`),
 };
 
 // Visits API
