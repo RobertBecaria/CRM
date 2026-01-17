@@ -68,10 +68,11 @@ class RetreatExpenseTester:
         headers = {'Authorization': f'Bearer {self.token}', 'Content-Type': 'application/json'}
         
         # Create retreat
+        current_year = datetime.now().year
         retreat_data = {
             "name": "Дыхательный ретрит в горах",
-            "start_date": "2024-06-15",
-            "end_date": "2024-06-17"
+            "start_date": f"{current_year}-06-15",
+            "end_date": f"{current_year}-06-17"
         }
         
         response = requests.post(f"{self.base_url}/retreats", json=retreat_data, headers=headers)
