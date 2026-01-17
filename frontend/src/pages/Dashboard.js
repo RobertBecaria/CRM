@@ -83,7 +83,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 mb-6">
         <KPICard
           title="Всего клиентов"
           value={stats?.total_clients || 0}
@@ -104,13 +104,6 @@ export default function Dashboard() {
           icon={TrendingUp}
           delay="stagger-3"
           testId="kpi-visits-30"
-        />
-        <KPICard
-          title="Активных тем"
-          value={stats?.top_topics?.length || 0}
-          icon={Activity}
-          delay="stagger-4"
-          testId="kpi-topics"
         />
       </div>
 
