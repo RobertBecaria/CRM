@@ -137,7 +137,7 @@ export default function Dashboard() {
           title="Расходы на ретриты"
           value={formatCurrency(financial.retreat_expenses_ytd || 0)}
           subtitle={`Прибыль ретритов: ${formatCurrency(financial.retreat_profit_ytd || 0)}`}
-          icon={TrendingUp}
+          icon={Receipt}
           color="destructive"
           delay="stagger-3"
           testId="kpi-retreat-expenses"
