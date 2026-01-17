@@ -126,13 +126,13 @@ export default function Dashboard() {
           testId="kpi-revenue-30"
         />
         <FinancialCard
-          title="Расходы на ретриты"
-          value={formatCurrency(financial.retreat_expenses_ytd || 0)}
-          subtitle={`Прибыль ретритов: ${formatCurrency(financial.retreat_profit_ytd || 0)}`}
-          icon={Receipt}
-          color="destructive"
+          title="Доходы за ретриты"
+          value={formatCurrency(financial.retreat_revenue_ytd || 0)}
+          subtitle={`Прибыль: ${formatCurrency(financial.retreat_profit_ytd || 0)}`}
+          icon={Mountain}
+          color="chart-3"
           delay="stagger-3"
-          testId="kpi-retreat-expenses"
+          testId="kpi-retreat-revenue"
         />
       </div>
 
