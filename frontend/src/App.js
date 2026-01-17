@@ -12,6 +12,7 @@ import RetreatList from './pages/RetreatList';
 import RetreatDetail from './pages/RetreatDetail';
 import CalendarPage from './pages/Calendar';
 import Statistics from './pages/Statistics';
+import Settings from './pages/Settings';
 import './App.css';
 
 // Protected Route wrapper
