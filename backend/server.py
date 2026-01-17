@@ -680,6 +680,49 @@ async def get_client_stats(
         "year": target_year
     }
 
+@api_router.get("/clients/{client_id}/practice-stats")
+async def get_client_practice_stats(
+    client_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get practice counts and retreat count for a specific client"""
+    # Verify client exists
+    try:
+        client = await db.clients.find_one({"_id": ObjectId(client_id)})
+    except:
+        raise HTTPException(status_code=400, detail="Invalid client ID format")
+    
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    # Count practices from personal visits only (excluding retreats)
+    pipeline = [
+        {"$match": {"client_id": client_id, "retreat_id": {"$eq": None}}},
+        {"$unwind": {"path": "$practices", "preserveNullAndEmptyArrays": False}},
+        {"$group": {"_id": "$practices", "count": {"$sum": 1}}},
+        {"$sort": {"_id": 1}}
+    ]
+    practices_result = await db.visits.aggregate(pipeline).to_list(20)
+    practice_counts = {p["_id"]: p["count"] for p in practices_result}
+    
+    # Count personal visits (excluding retreats)
+    personal_visits_count = await db.visits.count_documents({
+        "client_id": client_id, 
+        "retreat_id": {"$eq": None}
+    })
+    
+    # Count retreat participations
+    retreat_count = await db.visits.count_documents({
+        "client_id": client_id,
+        "retreat_id": {"$ne": None}
+    })
+    
+    return {
+        "practice_counts": practice_counts,
+        "personal_visits_count": personal_visits_count,
+        "retreat_count": retreat_count
+    }
+
 @api_router.get("/stats/topics")
 async def get_topics_stats(
     date_from: Optional[str] = None,
