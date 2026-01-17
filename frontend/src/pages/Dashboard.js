@@ -108,7 +108,7 @@ export default function Dashboard() {
       </div>
 
       {/* Financial KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 mb-8">
         <FinancialCard
           title="Чистая прибыль"
           value={formatCurrency((financial.revenue_ytd || 0) + (financial.tips_ytd || 0) - (financial.retreat_expenses_ytd || 0))}
@@ -134,14 +134,6 @@ export default function Dashboard() {
           color="destructive"
           delay="stagger-3"
           testId="kpi-retreat-expenses"
-        />
-        <FinancialCard
-          title="Средний чек"
-          value={formatCurrency(financial.avg_check || 0)}
-          icon={Gift}
-          color="success"
-          delay="stagger-4"
-          testId="kpi-avg-check"
         />
       </div>
 
