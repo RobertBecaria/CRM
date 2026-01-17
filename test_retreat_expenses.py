@@ -17,7 +17,18 @@ class RetreatExpenseTester:
 
     def authenticate(self):
         """Get authentication token"""
-        # Try existing admin credentials first
+        # Try the most recent user from previous test
+        try:
+            response = requests.post(f"{self.base_url}/auth/login", 
+                                   json={"email": "admin_20260117_070035@test.com", "password": "password123"})
+            if response.status_code == 200:
+                self.token = response.json()['access_token']
+                print("✅ Authenticated with existing user from previous test")
+                return True
+        except Exception as e:
+            print(f"Login with recent user failed: {e}")
+        
+        # Try existing admin credentials
         try:
             response = requests.post(f"{self.base_url}/auth/login", 
                                    json={"email": "admin@test.com", "password": "password123"})
@@ -26,23 +37,7 @@ class RetreatExpenseTester:
                 print("✅ Authenticated with existing admin credentials")
                 return True
         except Exception as e:
-            print(f"Login attempt failed: {e}")
-        
-        # Try to register with a new email
-        test_email = f"retreat_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}@test.com"
-        test_password = "password123"
-        
-        try:
-            response = requests.post(f"{self.base_url}/auth/register", 
-                                   json={"email": test_email, "password": test_password})
-            if response.status_code == 200:
-                self.token = response.json()['access_token']
-                print(f"✅ Registered and authenticated as {test_email}")
-                return True
-            else:
-                print(f"Registration failed: {response.status_code} - {response.text}")
-        except Exception as e:
-            print(f"Registration attempt failed: {e}")
+            print(f"Login with admin failed: {e}")
         
         print("❌ Failed to authenticate")
         return False
