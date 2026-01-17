@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button';
 import { Skeleton } from '../components/ui/skeleton';
 import { Badge } from '../components/ui/badge';
+import { Users, Calendar, TrendingUp, Plus, ArrowRight, Banknote, Wallet, Sparkles, Mountain, Receipt } from 'lucide-react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 
