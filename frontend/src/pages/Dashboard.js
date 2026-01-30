@@ -65,6 +65,22 @@ export default function Dashboard() {
 
   const financial = stats?.financial || {};
   const practices = stats?.practices || [];
+  
+  // Merge practices from settings with actual stats
+  // This ensures all practices from settings are shown, even with 0 count
+  const practicesWithCounts = allPractices.map(practiceName => {
+    const found = practices.find(p => p.practice === practiceName);
+    return {
+      practice: practiceName,
+      count: found ? found.count : 0
+    };
+  });
+  // Also add any practices from stats that might not be in settings (legacy data)
+  practices.forEach(p => {
+    if (!practicesWithCounts.find(pwc => pwc.practice === p.practice)) {
+      practicesWithCounts.push(p);
+    }
+  });
 
   return (
     <div className="container-responsive py-8">
