@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { 
   ChevronLeft, ChevronRight, Calendar as CalendarIcon, User, Mountain, 
-  Plus, Sparkles, Banknote, Clock, X, Loader2 
+  Plus, Sparkles, Banknote, Clock, X, Loader2, Heart, CreditCard 
 } from 'lucide-react';
 import { toast } from 'sonner';
 import dayjs from 'dayjs';
