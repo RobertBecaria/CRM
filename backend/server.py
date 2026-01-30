@@ -148,6 +148,7 @@ class ClientUpdate(BaseModel):
 # Visit Models
 DEFAULT_PRICE = 15000  # Default price in rubles
 AVAILABLE_PRACTICES = ["Коррекция", "ТСЯ", "Лепило", "Ребефинг"]  # Available practices
+PAYMENT_TYPES = ["благотворительность", "абонемент"]  # Payment types for free visits
 
 class VisitCreate(BaseModel):
     date: str  # ISO date string YYYY-MM-DD
@@ -156,6 +157,7 @@ class VisitCreate(BaseModel):
     notes: Optional[str] = Field(None, max_length=5000)
     price: int = Field(default=DEFAULT_PRICE, ge=0)  # Price in rubles
     tips: int = Field(default=0, ge=0)  # Tips in rubles
+    payment_type: Optional[str] = None  # For free visits: "благотворительность" or "абонемент"
 
 class VisitUpdate(BaseModel):
     date: Optional[str] = None
@@ -164,6 +166,7 @@ class VisitUpdate(BaseModel):
     notes: Optional[str] = Field(None, max_length=5000)
     price: Optional[int] = Field(None, ge=0)
     tips: Optional[int] = Field(None, ge=0)
+    payment_type: Optional[str] = None  # For free visits: "благотворительность" or "абонемент"
 
 # ==================== AUTH ROUTES ====================
 
