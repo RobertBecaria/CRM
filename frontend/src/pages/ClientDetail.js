@@ -740,7 +740,7 @@ function VisitFormDialog({ clientId, visit, availablePractices = AVAILABLE_PRACT
           <div className="space-y-2">
             <Label>Практики</Label>
             <div className="flex flex-wrap gap-2">
-              {AVAILABLE_PRACTICES.map((practice) => {
+              {availablePractices.map((practice) => {
                 const isSelected = practices.includes(practice);
                 return (
                   <button
