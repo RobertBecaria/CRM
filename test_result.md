@@ -119,6 +119,17 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ COMPREHENSIVE TESTING COMPLETED: /api/stats/overview endpoint fully validated. All required financial fields present and correctly calculated: retreat_expenses_ytd, retreat_profit_ytd, revenue_ytd, tips_ytd. Tested with real retreat data (90,000 revenue, 31,000 expenses = 59,000 profit). Authentication working. All API responses correct. Backend implementation is solid."
+  - task: "Visit payment_type field support"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added payment_type field to VisitCreate and VisitUpdate models. Field is stored when creating/updating visits."
 
 frontend:
   - task: "Dashboard shows net profit (income minus expenses)"
@@ -132,16 +143,63 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "Updated Dashboard.js to show 'Чистая прибыль' (Net Profit) = revenue + tips - retreat_expenses. Added new card for 'Расходы на ретриты' (Retreat Expenses) with retreat profit in subtitle"
+  - task: "Remove 'Доход за 30 дней' financial KPI card"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Dashboard.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Removed the second financial KPI card 'Доход за 30 дней' from Dashboard"
+  - task: "Dynamic practices from settings in Dashboard stats"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Dashboard.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Dashboard now fetches practices from settings and shows all practices (including PTRP and others) in the Практики за год section, even if count is 0"
+  - task: "Payment type selection for free visits"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/ClientDetail.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added payment type selector when price is 0. User can choose between 'Благотворительность' and 'Абонемент'. Also updated Calendar.js display."
+  - task: "Backup restore file upload fix"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Settings.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed backup restore by separating file input from AlertDialogAction. Now using controlled dialog and ref-based file input that works properly."
 
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 2
+  test_sequence: 3
   run_ui: false
 
 test_plan:
   current_focus:
-    - "Dashboard shows net profit (income minus expenses)"
+    - "Visit payment_type field support"
+    - "Dynamic practices from settings in Dashboard stats"
+    - "Payment type selection for free visits"
+    - "Backup restore file upload fix"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -151,3 +209,5 @@ agent_communication:
     message: "Updated Dashboard to subtract retreat expenses from total income. Now shows 'Чистая прибыль' (Net Profit) instead of 'Общий доход' (Gross Income). Also added a dedicated card for retreat expenses. Please test the /api/stats/overview endpoint to verify retreat_expenses_ytd and retreat_profit_ytd are returned correctly."
   - agent: "testing"
     message: "✅ BACKEND TESTING COMPLETE: Financial statistics API (/api/stats/overview) is working perfectly. All required fields (retreat_expenses_ytd, retreat_profit_ytd, revenue_ytd, tips_ytd) are present and correctly calculated. Tested with real data: created retreat with 90,000 revenue and 31,000 expenses, API correctly returned 59,000 profit. Authentication working. Backend implementation is solid and ready. Frontend testing needed next."
+  - agent: "main"
+    message: "Implemented 4 fixes: 1) Removed 'Доход за 30 дней' financial KPI card, 2) Dashboard now shows all practices from settings including PTRP, 3) Added payment type selector (Благотворительность/Абонемент) for free visits, 4) Fixed backup restore file upload in Settings. Please test the backend API for payment_type field on visits."
