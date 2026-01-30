@@ -621,6 +621,12 @@ def main():
     
     tester.test_yearly_summary(2024)
     tester.test_get_topics()
+
+    # Test 5.2: Settings and Backup Testing (New Feature)
+    print("\n📍 PHASE 5.2: Settings and Backup Testing")
+    print("-" * 60)
+    tester.test_settings_practices()
+    tester.test_restore_backup()
     
     # Test 6: Cleanup (Delete operations)
     print("\n📍 PHASE 6: Cleanup")
