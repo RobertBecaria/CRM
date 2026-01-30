@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { statsApi, retreatsApi } from '../lib/api';
+import { statsApi, retreatsApi, settingsApi } from '../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Skeleton } from '../components/ui/skeleton';
