@@ -121,15 +121,18 @@ backend:
         comment: "✅ COMPREHENSIVE TESTING COMPLETED: /api/stats/overview endpoint fully validated. All required financial fields present and correctly calculated: retreat_expenses_ytd, retreat_profit_ytd, revenue_ytd, tips_ytd. Tested with real retreat data (90,000 revenue, 31,000 expenses = 59,000 profit). Authentication working. All API responses correct. Backend implementation is solid."
   - task: "Visit payment_type field support"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added payment_type field to VisitCreate and VisitUpdate models. Field is stored when creating/updating visits."
+      - working: true
+        agent: "testing"
+        comment: "✅ COMPREHENSIVE PAYMENT_TYPE TESTING COMPLETED: All payment_type functionality working perfectly. Successfully tested: 1) Create free visits with payment_type='благотворительность' and 'абонемент' (both returned correct payment_type and price=0), 2) Update visit payment_type field (successfully changed from 'благотворительность' to 'абонемент'), 3) Get visits returns payment_type field correctly (found 2 visits with payment_type in response). Backend API fully supports payment_type field for free visits."
 
 frontend:
   - task: "Dashboard shows net profit (income minus expenses)"
