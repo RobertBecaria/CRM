@@ -314,11 +314,30 @@ export default function SettingsPage() {
               <p className="text-sm text-amber-700 mb-3">
                 Внимание: это заменит все текущие данные!
               </p>
-              <AlertDialog>
+              
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleRestoreBackup}
+                className="hidden"
+                disabled={restoring}
+              />
+              
+              <AlertDialog open={restoreDialogOpen} onOpenChange={setRestoreDialogOpen}>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="border-amber-300 hover:bg-amber-100">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Восстановить
+                  <Button 
+                    variant="outline" 
+                    className="border-amber-300 hover:bg-amber-100"
+                    disabled={restoring}
+                  >
+                    {restoring ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4 mr-2" />
+                    )}
+                    {restoring ? 'Восстановление...' : 'Восстановить'}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -331,22 +350,12 @@ export default function SettingsPage() {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Отмена</AlertDialogCancel>
-                    <AlertDialogAction asChild>
-                      <label className="cursor-pointer bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-md">
-                        {restoring ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          'Выбрать файл'
-                        )}
-                        <input
-                          type="file"
-                          accept=".json"
-                          onChange={handleRestoreBackup}
-                          className="hidden"
-                          disabled={restoring}
-                        />
-                      </label>
-                    </AlertDialogAction>
+                    <Button 
+                      onClick={handleSelectFile}
+                      className="bg-amber-600 hover:bg-amber-700"
+                    >
+                      Выбрать файл
+                    </Button>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
