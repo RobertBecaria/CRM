@@ -21,8 +21,13 @@ const DEFAULT_PRICE = 15000;
 const AVAILABLE_PRACTICES = ['Коррекция', 'ТСЯ', 'Лепило', 'Ребефинг'];
 
 // Helper function to get payment status
-function getPaymentStatus(price) {
-  if (price === 0) return { label: 'Благотворительность', variant: 'outline', icon: Heart };
+function getPaymentStatus(price, paymentType) {
+  if (price === 0) {
+    if (paymentType === 'абонемент') {
+      return { label: 'Абонемент', variant: 'secondary', icon: CreditCard };
+    }
+    return { label: 'Благотворительность', variant: 'outline', icon: Heart };
+  }
   if (price < DEFAULT_PRICE) return { label: 'Скидка', variant: 'secondary', icon: Gift };
   return { label: 'Обычный', variant: 'default', icon: Banknote };
 }
