@@ -272,7 +272,7 @@ export default function ClientDetail() {
                     <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100">{practiceStats.retreat_count || 0}</Badge>
                   </div>
                   {/* Practices breakdown */}
-                  {AVAILABLE_PRACTICES.map(practice => {
+                  {availablePractices.map(practice => {
                     const count = practiceStats.practice_counts?.[practice] || 0;
                     return (
                       <div key={practice} className="flex items-center justify-between">
@@ -280,7 +280,7 @@ export default function ClientDetail() {
                           <Sparkles className="w-4 h-4 text-[hsl(var(--accent-foreground))]" />
                           {practice}
                         </span>
-                        <Badge variant="outline">{count}</Badge>
+                        <Badge variant="outline" className={count > 0 ? '' : 'text-muted-foreground'}>{count}</Badge>
                       </div>
                     );
                   })}
