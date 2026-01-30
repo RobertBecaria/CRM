@@ -584,13 +584,15 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
     setLoading(true);
 
     try {
+      const priceValue = parseInt(price) || 0;
       const data = { 
         date, 
         topic, 
         practices,
         notes, 
-        price: parseInt(price) || 0, 
-        tips: parseInt(tips) || 0 
+        price: priceValue, 
+        tips: parseInt(tips) || 0,
+        payment_type: priceValue === 0 ? paymentType : null
       };
       
       if (visit) {
