@@ -205,10 +205,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Visit payment_type field support"
-    - "Dynamic practices from settings in Dashboard stats"
+    - "Dashboard shows net profit (income minus expenses)"
     - "Payment type selection for free visits"
-    - "Backup restore file upload fix"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
