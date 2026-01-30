@@ -51,6 +51,7 @@ export default function ClientDetail() {
   const [client, setClient] = useState(null);
   const [visits, setVisits] = useState([]);
   const [practiceStats, setPracticeStats] = useState(null);
+  const [availablePractices, setAvailablePractices] = useState(AVAILABLE_PRACTICES);
   const [loading, setLoading] = useState(true);
   const [visitsLoading, setVisitsLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -64,6 +65,7 @@ export default function ClientDetail() {
   useEffect(() => {
     fetchClient();
     fetchPracticeStats();
+    fetchSettings();
   }, [id]);
 
   useEffect(() => {
@@ -82,6 +84,17 @@ export default function ClientDetail() {
       navigate('/clients');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSettings = async () => {
+    try {
+      const response = await settingsApi.get();
+      if (response.data?.practices?.length > 0) {
+        setAvailablePractices(response.data.practices);
+      }
+    } catch (err) {
+      console.error('Failed to fetch settings:', err);
     }
   };
 
