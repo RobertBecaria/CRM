@@ -396,7 +396,7 @@ export default function ClientDetail() {
                     const price = visit.price ?? DEFAULT_PRICE;
                     const tips = visit.tips ?? 0;
                     const practices = visit.practices || [];
-                    const status = getPaymentStatus(price);
+                    const status = getPaymentStatus(price, visit.payment_type);
                     const StatusIcon = status.icon;
                     const isRetreat = !!visit.retreat_id;
                     
