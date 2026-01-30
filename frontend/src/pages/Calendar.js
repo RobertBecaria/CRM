@@ -736,6 +736,9 @@ function AddVisitDialog({ open, onClose, selectedDate, onSuccess }) {
                   onChange={(e) => setPrice(e.target.value)}
                   data-testid="calendar-visit-price"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Статус: <Badge className={status.color}>{status.label}</Badge>
+                </p>
               </div>
               <div className="space-y-2">
                 <Label>Чаевые (₽)</Label>
@@ -750,11 +753,55 @@ function AddVisitDialog({ open, onClose, selectedDate, onSuccess }) {
               </div>
             </div>
 
+            {/* Payment type selector - only shown when price is 0 */}
+            {(parseInt(price) || 0) === 0 && (
+              <div className="space-y-2">
+                <Label>Тип оплаты</Label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentType('благотворительность')}
+                    className={`
+                      flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                      border-2 flex items-center justify-center gap-2
+                      ${paymentType === 'благотворительность'
+                        ? 'bg-[hsl(var(--primary))] text-white border-[hsl(var(--primary))]'
+                        : 'bg-white text-[hsl(var(--foreground))] border-[hsl(var(--border))] hover:border-[hsl(var(--primary))]'
+                      }
+                    `}
+                    data-testid="calendar-payment-type-charity"
+                  >
+                    <Heart className={`w-4 h-4 ${paymentType === 'благотворительность' ? 'text-white' : 'text-[hsl(var(--primary))]'}`} />
+                    Благотворительность
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentType('абонемент')}
+                    className={`
+                      flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                      border-2 flex items-center justify-center gap-2
+                      ${paymentType === 'абонемент'
+                        ? 'bg-[hsl(var(--primary))] text-white border-[hsl(var(--primary))]'
+                        : 'bg-white text-[hsl(var(--foreground))] border-[hsl(var(--border))] hover:border-[hsl(var(--primary))]'
+                      }
+                    `}
+                    data-testid="calendar-payment-type-subscription"
+                  >
+                    <CreditCard className={`w-4 h-4 ${paymentType === 'абонемент' ? 'text-white' : 'text-[hsl(var(--primary))]'}`} />
+                    Абонемент
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Выберите тип для бесплатного визита
+                </p>
+              </div>
+            )}
+
             {/* Practices */}
             <div className="space-y-2">
               <Label>Практики</Label>
               <div className="flex flex-wrap gap-2">
-                {AVAILABLE_PRACTICES.map((practice) => {
+                {availablePractices.map((practice) => {
                   const isSelected = practices.includes(practice);
                   return (
                     <button
