@@ -633,6 +633,13 @@ def main():
     print("-" * 60)
     if tester.visit_id:
         tester.test_delete_visit(tester.visit_id)
+    
+    # Clean up payment type test visits
+    if charity_visit_id:
+        tester.test_delete_visit(charity_visit_id)
+    if subscription_visit_id:
+        tester.test_delete_visit(subscription_visit_id)
+        
     if tester.client_id:
         tester.test_delete_client(tester.client_id)
     
