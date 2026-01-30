@@ -551,7 +551,7 @@ export default function ClientDetail() {
   );
 }
 
-function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
+function VisitFormDialog({ clientId, visit, availablePractices = AVAILABLE_PRACTICES, onClose, onSuccess }) {
   const [date, setDate] = useState(visit?.date || dayjs().format('YYYY-MM-DD'));
   const [topic, setTopic] = useState(visit?.topic || '');
   const [practices, setPractices] = useState(visit?.practices || []);
