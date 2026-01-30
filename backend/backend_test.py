@@ -585,6 +585,29 @@ def main():
         
         if tester.visit_id:
             tester.test_update_visit(tester.visit_id, "Stress and Anxiety")
+
+    # Test 4.1: Payment Type Testing (New Feature)
+    print("\n📍 PHASE 4.1: Payment Type Testing")
+    print("-" * 60)
+    charity_visit_id = None
+    subscription_visit_id = None
+    
+    if tester.client_id:
+        # Test creating free visits with different payment types
+        success, charity_visit_id = tester.test_create_free_visit_with_payment_type(
+            tester.client_id, "2024-03-01", "Благотворительная сессия", "благотворительность"
+        )
+        
+        success, subscription_visit_id = tester.test_create_free_visit_with_payment_type(
+            tester.client_id, "2024-03-02", "Сессия по абонементу", "абонемент"
+        )
+        
+        # Test updating visit with payment_type
+        if charity_visit_id:
+            tester.test_update_visit_payment_type(charity_visit_id, "абонемент")
+        
+        # Test getting visits and verify payment_type is returned
+        tester.test_get_visits_with_payment_type(tester.client_id)
     
     # Test 5: Statistics
     print("\n📍 PHASE 5: Statistics")
