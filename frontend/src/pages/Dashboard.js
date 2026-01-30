@@ -159,14 +159,14 @@ export default function Dashboard() {
             <CardDescription>Статистика применяемых практик</CardDescription>
           </CardHeader>
           <CardContent>
-            {practices.length > 0 ? (
+            {practicesWithCounts.length > 0 ? (
               <div className="space-y-3" data-testid="practices-stats-list">
-                {practices.map((p) => (
+                {practicesWithCounts.map((p) => (
                   <div key={p.practice} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-sm">{p.practice}</span>
                     </div>
-                    <Badge variant="outline" className="bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]">
+                    <Badge variant="outline" className={`${p.count > 0 ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]' : 'bg-muted text-muted-foreground'}`}>
                       {p.count}
                     </Badge>
                   </div>
@@ -177,10 +177,10 @@ export default function Dashboard() {
                 Практики ещё не записаны
               </div>
             )}
-            {practices.length > 0 && (
+            {practicesWithCounts.length > 0 && (
               <div className="mt-4 pt-4 border-t">
                 <p className="text-sm text-muted-foreground">
-                  Всего применено практик: <span className="font-medium text-foreground">{practices.reduce((sum, p) => sum + p.count, 0)}</span>
+                  Всего применено практик: <span className="font-medium text-foreground">{practicesWithCounts.reduce((sum, p) => sum + p.count, 0)}</span>
                 </p>
               </div>
             )}
