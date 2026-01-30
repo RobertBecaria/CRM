@@ -19,6 +19,7 @@ function formatCurrency(amount) {
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [retreatStats, setRetreatStats] = useState(null);
+  const [allPractices, setAllPractices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -29,12 +30,14 @@ export default function Dashboard() {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const [overviewRes, retreatsRes] = await Promise.all([
+      const [overviewRes, retreatsRes, settingsRes] = await Promise.all([
         statsApi.getOverview(),
-        retreatsApi.getStats()
+        retreatsApi.getStats(),
+        settingsApi.get()
       ]);
       setStats(overviewRes.data);
       setRetreatStats(retreatsRes.data);
+      setAllPractices(settingsRes.data?.practices || []);
     } catch (err) {
       setError('Не удалось загрузить данные');
       console.error(err);
