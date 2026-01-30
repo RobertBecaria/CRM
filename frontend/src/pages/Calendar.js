@@ -579,6 +579,7 @@ function DayDetailDialog({ date, events, onClose, onAddVisit }) {
 function AddVisitDialog({ open, onClose, selectedDate, onSuccess }) {
   const [clients, setClients] = useState([]);
   const [loadingClients, setLoadingClients] = useState(true);
+  const [availablePractices, setAvailablePractices] = useState(AVAILABLE_PRACTICES);
   const [selectedClient, setSelectedClient] = useState('');
   const [date, setDate] = useState(selectedDate || dayjs().format('YYYY-MM-DD'));
   const [topic, setTopic] = useState('');
@@ -586,12 +587,14 @@ function AddVisitDialog({ open, onClose, selectedDate, onSuccess }) {
   const [notes, setNotes] = useState('');
   const [price, setPrice] = useState(DEFAULT_PRICE);
   const [tips, setTips] = useState(0);
+  const [paymentType, setPaymentType] = useState('благотворительность');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (open) {
       setDate(selectedDate || dayjs().format('YYYY-MM-DD'));
       fetchClients();
+      fetchSettings();
     }
   }, [open, selectedDate]);
 
@@ -604,6 +607,17 @@ function AddVisitDialog({ open, onClose, selectedDate, onSuccess }) {
       toast.error('Не удалось загрузить клиентов');
     } finally {
       setLoadingClients(false);
+    }
+  };
+
+  const fetchSettings = async () => {
+    try {
+      const response = await settingsApi.get();
+      if (response.data?.practices?.length > 0) {
+        setAvailablePractices(response.data.practices);
+      }
+    } catch (err) {
+      console.error('Failed to fetch settings:', err);
     }
   };
 
@@ -624,13 +638,15 @@ function AddVisitDialog({ open, onClose, selectedDate, onSuccess }) {
 
     setLoading(true);
     try {
+      const priceValue = parseInt(price) || 0;
       await visitsApi.create(selectedClient, {
         date,
         topic,
         practices,
         notes,
-        price: parseInt(price) || 0,
-        tips: parseInt(tips) || 0
+        price: priceValue,
+        tips: parseInt(tips) || 0,
+        payment_type: priceValue === 0 ? paymentType : null
       });
       toast.success('Визит добавлен');
       
@@ -641,6 +657,7 @@ function AddVisitDialog({ open, onClose, selectedDate, onSuccess }) {
       setNotes('');
       setPrice(DEFAULT_PRICE);
       setTips(0);
+      setPaymentType('благотворительность');
       
       onSuccess();
     } catch (err) {
@@ -649,6 +666,8 @@ function AddVisitDialog({ open, onClose, selectedDate, onSuccess }) {
       setLoading(false);
     }
   };
+
+  const status = getPaymentStatus(parseInt(price) || 0, paymentType);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
