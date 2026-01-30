@@ -544,6 +544,7 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
   const [notes, setNotes] = useState(visit?.notes || '');
   const [price, setPrice] = useState(visit?.price ?? DEFAULT_PRICE);
   const [tips, setTips] = useState(visit?.tips ?? 0);
+  const [paymentType, setPaymentType] = useState(visit?.payment_type || 'благотворительность');
   const [loading, setLoading] = useState(false);
 
   // Update form when visit changes (for editing)
@@ -555,6 +556,7 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
       setNotes(visit.notes || '');
       setPrice(visit.price ?? DEFAULT_PRICE);
       setTips(visit.tips ?? 0);
+      setPaymentType(visit.payment_type || 'благотворительность');
     } else {
       // Reset to defaults for new visit
       setDate(dayjs().format('YYYY-MM-DD'));
@@ -563,10 +565,11 @@ function VisitFormDialog({ clientId, visit, onClose, onSuccess }) {
       setNotes('');
       setPrice(DEFAULT_PRICE);
       setTips(0);
+      setPaymentType('благотворительность');
     }
   }, [visit]);
 
-  const status = getPaymentStatus(price);
+  const status = getPaymentStatus(parseInt(price) || 0, paymentType);
 
   const togglePractice = (practice) => {
     setPractices(prev => 
