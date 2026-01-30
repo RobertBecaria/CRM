@@ -31,8 +31,13 @@ function formatCurrency(amount) {
 }
 
 // Get payment status
-function getPaymentStatus(price) {
-  if (price === 0) return { label: 'Благотворительность', color: 'bg-purple-100 text-purple-700' };
+function getPaymentStatus(price, paymentType) {
+  if (price === 0) {
+    if (paymentType === 'абонемент') {
+      return { label: 'Абонемент', color: 'bg-blue-100 text-blue-700' };
+    }
+    return { label: 'Благотворительность', color: 'bg-purple-100 text-purple-700' };
+  }
   if (price < DEFAULT_PRICE) return { label: 'Скидка', color: 'bg-amber-100 text-amber-700' };
   return { label: 'Обычный', color: 'bg-green-100 text-green-700' };
 }
