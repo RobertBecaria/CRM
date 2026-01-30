@@ -317,6 +317,7 @@ export default function ClientDetail() {
                   <VisitFormDialog
                     clientId={id}
                     visit={editingVisit}
+                    availablePractices={availablePractices}
                     onClose={() => { setVisitDialogOpen(false); setEditingVisit(null); }}
                     onSuccess={() => { fetchVisits(); fetchClient(); }}
                   />
