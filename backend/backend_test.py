@@ -256,6 +256,125 @@ class KinesioCRMTester:
             print(f"   ✓ Visit updated: {response.get('topic')}")
         return success
 
+    def test_create_free_visit_with_payment_type(self, client_id, date, topic, payment_type):
+        """Test create visit with price=0 and payment_type"""
+        success, response = self.run_test(
+            f"Create Free Visit with Payment Type ({payment_type})",
+            "POST",
+            f"clients/{client_id}/visits",
+            200,
+            data={
+                "date": date, 
+                "topic": topic, 
+                "price": 0, 
+                "payment_type": payment_type
+            }
+        )
+        if success and 'id' in response:
+            print(f"   ✓ Free visit created with payment_type: {response.get('payment_type')}")
+            print(f"   ✓ Price: {response.get('price')}")
+            return True, response['id']
+        return False, None
+
+    def test_update_visit_payment_type(self, visit_id, payment_type):
+        """Test update visit with payment_type"""
+        success, response = self.run_test(
+            f"Update Visit Payment Type ({payment_type})",
+            "PUT",
+            f"visits/{visit_id}",
+            200,
+            data={"payment_type": payment_type}
+        )
+        if success:
+            print(f"   ✓ Visit payment_type updated: {response.get('payment_type')}")
+        return success
+
+    def test_get_visits_with_payment_type(self, client_id):
+        """Test get visits and verify payment_type is returned"""
+        success, response = self.run_test(
+            "Get Visits with Payment Type",
+            "GET",
+            f"clients/{client_id}/visits",
+            200
+        )
+        if success:
+            visits = response.get('visits', [])
+            print(f"   ✓ Found {len(visits)} visits")
+            
+            # Check if any visits have payment_type field
+            visits_with_payment_type = [v for v in visits if 'payment_type' in v and v['payment_type'] is not None]
+            if visits_with_payment_type:
+                print(f"   ✓ Found {len(visits_with_payment_type)} visits with payment_type")
+                for visit in visits_with_payment_type:
+                    print(f"      - Visit {visit.get('id')}: payment_type={visit.get('payment_type')}, price={visit.get('price')}")
+            else:
+                print(f"   ⚠️  No visits found with payment_type field")
+        return success
+
+    def test_settings_practices(self):
+        """Test settings API to ensure practices are returned"""
+        success, response = self.run_test(
+            "Get Settings (Practices)",
+            "GET",
+            "settings",
+            200
+        )
+        if success:
+            practices = response.get('practices')
+            if practices and isinstance(practices, list):
+                print(f"   ✓ Practices found: {practices}")
+                return True
+            else:
+                self.log_test("Settings Practices", False, "Missing or invalid 'practices' array in settings")
+                return False
+        return False
+
+    def test_restore_backup(self):
+        """Test restore endpoint with small backup data"""
+        # Create minimal backup data
+        backup_data = {
+            "clients": [
+                {
+                    "first_name": "Test",
+                    "last_name": "Restore",
+                    "dob": "1990-01-01",
+                    "phone": "+1234567890",
+                    "middle_name": "",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-01T00:00:00Z"
+                }
+            ],
+            "visits": [
+                {
+                    "client_id": "test_client_id",
+                    "date": "2024-01-15",
+                    "topic": "Test Visit",
+                    "practices": ["Коррекция"],
+                    "notes": "Test restore",
+                    "price": 15000,
+                    "tips": 0,
+                    "payment_type": None,
+                    "created_at": "2024-01-15T00:00:00Z",
+                    "updated_at": "2024-01-15T00:00:00Z"
+                }
+            ],
+            "retreats": []
+        }
+        
+        success, response = self.run_test(
+            "Restore Backup",
+            "POST",
+            "restore",
+            200,
+            data=backup_data
+        )
+        if success:
+            restored = response.get('restored', {})
+            print(f"   ✓ Restored clients: {restored.get('clients', 0)}")
+            print(f"   ✓ Restored visits: {restored.get('visits', 0)}")
+            print(f"   ✓ Restored retreats: {restored.get('retreats', 0)}")
+        return success
+
     def test_stats_overview(self):
         """Test stats overview"""
         success, response = self.run_test(
