@@ -554,8 +554,8 @@ def main():
     print("\n📍 PHASE 2: Authentication")
     print("-" * 60)
     if not tester.test_register(test_email, test_password):
-        print("\n❌ Registration failed. Trying login with existing credentials...")
-        if not tester.test_login("admin@test.com", "password123"):
+        print("\n❌ Registration failed. Trying login with test credentials...")
+        if not tester.test_login("test@backend.com", "testpass123"):
             print("\n❌ CRITICAL: Cannot authenticate. Stopping tests.")
             tester.print_summary()
             return 1
