@@ -504,7 +504,7 @@ function EventCard({ event }) {
     );
   }
 
-  const status = getPaymentStatus(event.price);
+  const status = getPaymentStatus(event.price, event.payment_type);
 
   return (
     <Link to={`/clients/${event.client_id}`}>
