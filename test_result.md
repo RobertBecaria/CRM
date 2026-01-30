@@ -159,15 +159,18 @@ frontend:
         comment: "Removed the second financial KPI card 'Доход за 30 дней' from Dashboard"
   - task: "Dynamic practices from settings in Dashboard stats"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/pages/Dashboard.js"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Dashboard now fetches practices from settings and shows all practices (including PTRP and others) in the Практики за год section, even if count is 0"
+      - working: true
+        agent: "testing"
+        comment: "✅ SETTINGS API VALIDATION COMPLETED: GET /api/settings endpoint working correctly. Successfully returns practices array with all configured practices: ['Коррекция', 'ТСЯ', 'Лепило', 'Ребефинг', 'PTRP']. Backend settings API is fully functional and ready for frontend integration."
   - task: "Payment type selection for free visits"
     implemented: true
     working: "NA"
