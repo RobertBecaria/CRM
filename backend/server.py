@@ -407,6 +407,7 @@ async def create_visit(
         "notes": visit_data.notes or "",
         "price": visit_data.price,
         "tips": visit_data.tips,
+        "payment_type": visit_data.payment_type,
         "created_at": datetime.now(timezone.utc),
         "updated_at": datetime.now(timezone.utc)
     }
