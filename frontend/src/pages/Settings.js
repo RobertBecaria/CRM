@@ -48,6 +48,8 @@ export default function SettingsPage() {
   // Backup/Restore
   const [restoring, setRestoring] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
+  const fileInputRef = React.useRef(null);
 
   useEffect(() => {
     fetchData();
