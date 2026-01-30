@@ -161,6 +161,9 @@ export default function SettingsPage() {
     const file = event.target.files?.[0];
     if (!file) return;
     
+    // Close dialog immediately to prevent UI issues
+    setRestoreDialogOpen(false);
+    
     try {
       setRestoring(true);
       const text = await file.text();
@@ -184,7 +187,15 @@ export default function SettingsPage() {
       toast.error(err.message || 'Не удалось восстановить данные');
     } finally {
       setRestoring(false);
-      event.target.value = ''; // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''; // Reset file input
+      }
+    }
+  };
+  
+  const handleSelectFile = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
